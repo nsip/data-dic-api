@@ -3,8 +3,8 @@ package entity
 import (
 	"net/http"
 
-	lk "github.com/digisan/logkit"
 	"github.com/labstack/echo/v4"
+	"github.com/nsip/data-dic-api/server/api/db"
 )
 
 // @Title insert or update one entity data
@@ -15,11 +15,10 @@ import (
 // @Produce json
 // @Param   entity path string true "entity name for incoming entity data"
 // @Success 200 "OK - insert or update successfully"
+// @Failure 400 "Fail - invalid parameters or request body"
 // @Failure 500 "Fail - internal error"
-// @Router /api/entity/upsert [post]
-func UpsertEntity(c echo.Context) error {
-
-	lk.Log("...")
+// @Router /api/entity/insert [post]
+func Insert(c echo.Context) error {
 
 	var (
 		entity  = c.Param("entity")
@@ -33,6 +32,16 @@ func UpsertEntity(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "body data is empty")
 	}
 
-	return nil
+	db.UseDbCol("testing", "entity")
+	id, err := db.Insert(dataRdr)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
 
+	return c.JSON(http.StatusOK, id)
+}
+
+// @Router /api/entity/find [get]
+func Find(c echo.Context) error {
+	return nil
 }

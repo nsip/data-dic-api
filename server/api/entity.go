@@ -10,9 +10,11 @@ import (
 // "/api/entity"
 func EntityHandler(r *echo.Group) {
 
-	var mGET = map[string]echo.HandlerFunc{}
+	var mGET = map[string]echo.HandlerFunc{
+		"/find": entity.Find,
+	}
 	var mPOST = map[string]echo.HandlerFunc{
-		"/upsert": entity.UpsertEntity,
+		"/insert": entity.Insert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{}
