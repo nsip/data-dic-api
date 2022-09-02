@@ -15,7 +15,7 @@ import (
 	"github.com/nsip/data-dic-api/server/api"
 	"github.com/postfinance/single"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	// _ "github.com/nsip/data-dic-api/server/docs" // once `swag init`, comment it out
+	_ "github.com/nsip/data-dic-api/server/docs" // once `swag init`, comment it out
 )
 
 var (
@@ -26,9 +26,9 @@ func init() {
 	lk.WarnDetail(false)
 }
 
-// @title WISMED WISITE API
+// @title National Education Data Dictionary API
 // @version 1.0
-// @description This is wismed wisite-api server.
+// @description This is national education data dictionary backend-api server.
 // @termsOfService
 // @contact.name API Support
 // @contact.url

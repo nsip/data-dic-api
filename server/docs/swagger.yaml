@@ -1,0 +1,88 @@
+host: 127.0.0.1:1323
+info:
+  contact:
+    name: API Support
+  description: This is national education data dictionary backend-api server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: National Education Data Dictionary API
+  version: "1.0"
+paths:
+  /api/entity/find:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: database name
+        in: query
+        name: dbName
+        type: string
+      - description: collection name
+        in: query
+        name: colName
+        type: string
+      - description: json data for query
+        format: binary
+        in: body
+        name: data
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - find successfully
+        "400":
+          description: Fail - invalid parameters or request body
+        "500":
+          description: Fail - internal error
+      summary: find entities json content by pass a json query string via payload
+      tags:
+      - Entity
+  /api/entity/insert:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - default: dictionary
+        description: database name
+        in: query
+        name: dbName
+        type: string
+      - default: entity
+        description: collection name
+        in: query
+        name: colName
+        type: string
+      - description: entity name for incoming entity data
+        in: path
+        name: entity
+        required: true
+        type: string
+      - description: entity json data for uploading
+        format: binary
+        in: body
+        name: data
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - insert or update successfully
+        "400":
+          description: Fail - invalid parameters or request body
+        "500":
+          description: Fail - internal error
+      summary: insert or update one entity data by a json file
+      tags:
+      - Entity
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: authorization
+    type: apiKey
+swagger: "2.0"
