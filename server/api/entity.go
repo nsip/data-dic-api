@@ -14,7 +14,7 @@ func EntityHandler(r *echo.Group) {
 		"/find": entity.Find,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
-		"/insert": entity.Insert,
+		"/insert/:entity": entity.Insert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{}

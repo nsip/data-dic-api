@@ -37,12 +37,14 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "dictionary",
                         "description": "database name",
                         "name": "dbName",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "default": "entity",
                         "description": "collection name",
                         "name": "colName",
                         "in": "query"
@@ -71,7 +73,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/entity/insert": {
+        "/api/entity/insert/{entity}": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -146,7 +148,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "National Education Data Dictionary API",
-	Description:      "This is national education data dictionary backend-api server.",
+	Description:      "This is national education data dictionary backend-api server. Updated@ 2022-09-03T21:10:00+10:00",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

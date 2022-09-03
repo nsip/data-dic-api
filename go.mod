@@ -3,6 +3,7 @@ module github.com/nsip/data-dic-api
 go 1.19
 
 require (
+	github.com/digisan/db-helper v0.0.7
 	github.com/digisan/go-generics v0.2.2
 	github.com/digisan/gotk v0.1.19
 	github.com/digisan/json-tool v0.1.6

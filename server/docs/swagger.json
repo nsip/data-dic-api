@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is national education data dictionary backend-api server.",
+        "description": "This is national education data dictionary backend-api server. Updated@ 2022-09-03T21:10:00+10:00",
         "title": "National Education Data Dictionary API",
         "contact": {
             "name": "API Support"
@@ -29,12 +29,14 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "default": "dictionary",
                         "description": "database name",
                         "name": "dbName",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "default": "entity",
                         "description": "collection name",
                         "name": "colName",
                         "in": "query"
@@ -63,7 +65,7 @@
                 }
             }
         },
-        "/api/entity/insert": {
+        "/api/entity/insert/{entity}": {
             "post": {
                 "consumes": [
                     "application/json"
