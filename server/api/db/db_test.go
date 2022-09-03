@@ -27,8 +27,7 @@ func (p Person) String() string {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-func TestInsertDB(t *testing.T) {
-
+func TestInsert(t *testing.T) {
 	UseDbCol("testing", "users")
 
 	////////////////////////////////////////////////////////
@@ -58,8 +57,7 @@ func TestInsertDB(t *testing.T) {
 	fmt.Println(rIDs)
 }
 
-func TestFindDB(t *testing.T) {
-
+func TestFind(t *testing.T) {
 	UseDbCol("testing", "users")
 
 	////////////////////////////////////////////////////////
@@ -102,4 +100,55 @@ func TestFindDB(t *testing.T) {
 		fmt.Println()
 		fmt.Print(p)
 	}
+}
+
+func TestUpdate(t *testing.T) {
+	UseDbCol("testing", "users")
+
+	rt, err := Update(
+		strings.NewReader(`{
+			"$and": [
+				{
+					"age": {
+						"$gt": 60
+					}
+				}
+			]
+		}`),
+		// nil,
+		strings.NewReader(`{
+			"$set": {
+				"fullName": "User Modified"
+			},
+			"$inc": {
+				"age": 1
+			}
+		}`),
+		false,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(rt)
+}
+
+func TestDelete(t *testing.T) {
+	UseDbCol("testing", "users")
+
+	rt, err := Delete(
+		strings.NewReader(`{
+			"age": {
+				"$lt": 50
+			}				
+		}`),
+		false,
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(rt)
 }

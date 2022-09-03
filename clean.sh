@@ -2,6 +2,8 @@
 
 set -e
 
+rm -rf ./prelease/prelease
+
 rm -rf ./server/__debug_bin
 rm -rf ./server/server
 rm -rf ./server/tmp*

@@ -13,9 +13,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/nsip/data-dic-api/server/api"
+	_ "github.com/nsip/data-dic-api/server/docs" // once `swag init`, comment it out
 	"github.com/postfinance/single"
 	echoSwagger "github.com/swaggo/echo-swagger"
-	_ "github.com/nsip/data-dic-api/server/docs" // once `swag init`, comment it out
 )
 
 var (
@@ -28,7 +28,7 @@ func init() {
 
 // @title National Education Data Dictionary API
 // @version 1.0
-// @description This is national education data dictionary backend-api server.
+// @description This is national education data dictionary backend-api server. Updated@ 2022-09-03T21:10:00+10:00
 // @termsOfService
 // @contact.name API Support
 // @contact.url
@@ -77,8 +77,7 @@ func waitShutdown(e *echo.Echo) {
 
 		// other clean-up before closing echo
 		{
-			// ws.BroadCast("backend service shutting down...") // testing
-			// ws.CloseAllMsg()
+
 		}
 
 		// shutdown echo
@@ -113,7 +112,7 @@ func echoHost(done chan<- string) {
 
 		// groups without middleware
 		{
-			// api.SignHandler(e.Group("/api/sign"))
+			// api.SignHandler(e.Group("/api/xxx"))
 		}
 
 		// other groups with middleware

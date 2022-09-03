@@ -34,6 +34,10 @@ func getMongoClient(ip string, port int) *mongo.Client {
 	return client
 }
 
+func UpdateMongoClient(ip string, port int) {
+	Client = getMongoClient(ip, port)
+}
+
 func UseDbCol(dbName, colName string) {
 	col = Client.Database(dbName).Collection(colName)
 }
@@ -167,40 +171,80 @@ func FindOne[T any](rFilter io.Reader) (*T, error) {
 	return one, nil
 }
 
-///////////////////////////////////////////////
+func Update(rFilter, rUpdate io.Reader, one bool) (int, error) {
 
-// func Update(r io.Reader) (any, error) {
-// 	lk.FailOnErrWhen(col == nil, "%v", fmt.Errorf("collection is nil, use 'UseDbCol' to init one"))
+	lk.FailOnErrWhen(col == nil, "%v", fmt.Errorf("collection is nil, use 'UseDbCol' to init one"))
 
-// 	json, isArray, err := payload4json(r)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	var filter any
+	if rFilter != nil {
+		filterJSON, _, err := reader4json(rFilter)
+		if err != nil {
+			return 0, err
+		}
+		if err := bson.UnmarshalExtJSON(filterJSON, true, &filter); err != nil {
+			return 0, err
+		}
+	} else {
+		filter = bson.D{}
+	}
 
-// 	if isArray {
+	var update any
+	if rUpdate != nil {
+		updateJSON, _, err := reader4json(rUpdate)
+		if err != nil {
+			return 0, err
+		}
+		if err := bson.UnmarshalExtJSON(updateJSON, true, &update); err != nil {
+			return 0, err
+		}
+	} else {
+		return 0, nil
+	}
 
-// 		var docs []any
-// 		err := bson.UnmarshalExtJSON([]byte(json), true, &docs)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		result, err := col.UpdateMany(Ctx) // InsertMany(Ctx, docs)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return result.UpsertedCount, nil
+	if one {
+		result, err := col.UpdateOne(Ctx, filter, update)
+		if err != nil {
+			return 0, err
+		}
+		return int(result.ModifiedCount), nil
+	} else {
+		result, err := col.UpdateMany(Ctx, filter, update)
+		if err != nil {
+			return 0, err
+		}
+		return int(result.ModifiedCount), nil
+	}
+}
 
-// 	} else {
+func Delete(rFilter io.Reader, one bool) (int, error) {
 
-// 		var doc any
-// 		err := bson.UnmarshalExtJSON([]byte(json), true, &doc)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		result, err := col.UpdateOne(Ctx)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return result.UpsertedCount, nil
-// 	}
-// }
+	lk.FailOnErrWhen(col == nil, "%v", fmt.Errorf("collection is nil, use 'UseDbCol' to init one"))
+
+	var filter any
+	if rFilter != nil {
+		filterJSON, _, err := reader4json(rFilter)
+		if err != nil {
+			return 0, err
+		}
+		if err := bson.UnmarshalExtJSON(filterJSON, true, &filter); err != nil {
+			return 0, err
+		}
+	} else {
+		return 0, nil
+	}
+
+	if one {
+		result, err := col.DeleteOne(Ctx, filter)
+		if err != nil {
+			return 0, err
+		}
+		return int(result.DeletedCount), nil
+	} else {
+		result, err := col.DeleteMany(Ctx, filter)
+		if err != nil {
+			return 0, err
+		}
+		return int(result.DeletedCount), nil
+	}
+
+}
