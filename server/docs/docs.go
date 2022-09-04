@@ -22,6 +22,46 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/entity/db": {
+            "put": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "set mongodb database and collection for entity storage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "dictionary",
+                        "description": "database name",
+                        "name": "database",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "entity",
+                        "description": "collection name",
+                        "name": "collection",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - set db successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid fields"
+                    }
+                }
+            }
+        },
         "/api/entity/find": {
             "get": {
                 "consumes": [
@@ -35,20 +75,6 @@ const docTemplate = `{
                 ],
                 "summary": "find entities json content by pass a json query string via payload",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "default": "dictionary",
-                        "description": "database name",
-                        "name": "dbName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "default": "entity",
-                        "description": "collection name",
-                        "name": "colName",
-                        "in": "query"
-                    },
                     {
                         "format": "binary",
                         "description": "json data for query",
@@ -86,20 +112,6 @@ const docTemplate = `{
                 ],
                 "summary": "insert or update one entity data by a json file",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "default": "dictionary",
-                        "description": "database name",
-                        "name": "dbName",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "default": "entity",
-                        "description": "collection name",
-                        "name": "colName",
-                        "in": "query"
-                    },
                     {
                         "type": "string",
                         "description": "entity name for incoming entity data",
