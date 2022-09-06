@@ -4,11 +4,16 @@ import (
 	"fmt"
 
 	mh "github.com/digisan/db-helper/mongo"
+	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
 )
 
+const (
+	dataFolder = "./data/"
+)
+
 type DbConfig struct {
-	Database   string `form:"database" json:"database"` // ``
+	Database   string `form:"database" json:"database"`
 	Collection string `form:"collection" json:"collection"`
 }
 
@@ -24,6 +29,9 @@ var (
 )
 
 func init() {
-	lk.Log("%v", cfg)
+	gio.MustCreateDir(dataFolder)
+	lk.Log("ingested data store at %v", dataFolder)
+
 	mh.UseDbCol(cfg.Database, cfg.Collection)
+	lk.Log("%v", cfg)
 }

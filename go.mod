@@ -3,12 +3,12 @@ module github.com/nsip/data-dic-api
 go 1.19
 
 require (
-	github.com/digisan/db-helper v0.0.7
+	github.com/digisan/db-helper v0.0.11
 	github.com/digisan/go-generics v0.2.2
 	github.com/digisan/gotk v0.1.19
 	github.com/digisan/json-tool v0.1.6
 	github.com/digisan/logkit v0.1.0
-	github.com/labstack/echo/v4 v4.8.0
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/postfinance/single v0.0.2
 	github.com/swaggo/echo-swagger v1.3.4
 	github.com/swaggo/swag v1.8.5

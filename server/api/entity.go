@@ -12,10 +12,9 @@ func EntityHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
 		"/find": entity.Find,
-		// "/dump": entity.Dump,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
-		"/insert/:entity": entity.Insert,
+		"/upsert/:entityName": entity.Upsert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{
 		"/db": entity.UseDbCol,

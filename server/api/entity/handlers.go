@@ -3,6 +3,8 @@ package entity
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	mh "github.com/digisan/db-helper/mongo"
 	// . "github.com/digisan/go-generics/v2"
@@ -22,6 +24,9 @@ import (
 // @Failure 400 "Fail - invalid fields"
 // @Router /api/entity/db [put]
 func UseDbCol(c echo.Context) error {
+
+	lk.Log("Enter: UseDbCol")
+
 	err := c.Bind(&cfg)
 	switch {
 	case err != nil:
@@ -42,29 +47,49 @@ func UseDbCol(c echo.Context) error {
 // @Tags    Entity
 // @Accept  json
 // @Produce json
-// @Param   entity  path  string true  "entity name for incoming entity data"
-// @Param   data    body  string true  "entity json data for uploading" Format(binary)
+// @Param   entityName path string true "entity name for incoming entity data"
+// @Param   entityData body string true "entity json data for uploading" Format(binary)
 // @Success 200 "OK - insert or update successfully"
 // @Failure 400 "Fail - invalid parameters or request body"
 // @Failure 500 "Fail - internal error"
-// @Router /api/entity/insert/{entity} [post]
-func Insert(c echo.Context) error {
+// @Router /api/entity/upsert/{entityName} [post]
+func Upsert(c echo.Context) error {
+
+	lk.Log("Enter: Upsert")
+
 	var (
-		entity  = c.Param("entity")
-		dataRdr = c.Request().Body
+		entityName = c.Param("entityName")
+		dataRdr    = c.Request().Body
 	)
-	if len(entity) == 0 {
+	if len(entityName) == 0 {
 		return c.String(http.StatusBadRequest, "entity name is empty")
 	}
-	if dataRdr == nil {
+	if dataRdr != nil {
+		defer dataRdr.Close()
+	} else {
 		return c.String(http.StatusBadRequest, "payload for insert is empty")
 	}
 
-	id, err := mh.Insert(dataRdr)
+	// ingest inbound data into db, if entity already exists, replace old one
+	IdOrCnt, data, err := mh.Upsert(dataRdr, "Entity", entityName)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
+		return c.String(http.StatusInternalServerError, "error in db insert"+err.Error())
 	}
-	return c.JSON(http.StatusOK, id)
+
+	// ingest inbound data into db
+	// id, data, err := mh.Insert(dataRdr)
+	// if err != nil {
+	// 	return c.String(http.StatusInternalServerError, "error in db insert"+err.Error())
+	// }
+
+	if len(data) > 0 {
+		// save inbound json file to local folder
+		if err := os.WriteFile(filepath.Join(dataFolder, entityName), data, os.ModePerm); err != nil {
+			return c.String(http.StatusInternalServerError, "error in writing file"+err.Error())
+		}
+	}
+
+	return c.JSON(http.StatusOK, IdOrCnt)
 }
 
 // @Title find entity json
@@ -83,9 +108,11 @@ func Find(c echo.Context) error {
 		qryRdr = c.Request().Body
 	)
 
-	// if qryRdr == nil {
-	// 	return c.String(http.StatusBadRequest, "payload for query is empty")
-	// }
+	if qryRdr != nil {
+		defer qryRdr.Close()
+	} else {
+		return c.String(http.StatusBadRequest, "payload for query is empty")
+	}
 
 	results, err := mh.Find[EntityType](qryRdr)
 	if err != nil {
@@ -94,10 +121,6 @@ func Find(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, results)
 }
-
-// @Router /api/entity/dump [get]
-// func Dump(c echo.Context) error {
-// }
 
 // func AllEntityNames(c echo.Context) error {
 // }

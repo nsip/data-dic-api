@@ -99,7 +99,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/entity/insert/{entity}": {
+        "/api/entity/insert/{entityName}": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -115,14 +115,14 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "entity name for incoming entity data",
-                        "name": "entity",
+                        "name": "entityName",
                         "in": "path",
                         "required": true
                     },
                     {
                         "format": "binary",
                         "description": "entity json data for uploading",
-                        "name": "data",
+                        "name": "entityData",
                         "in": "body",
                         "required": true,
                         "schema": {

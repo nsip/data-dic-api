@@ -61,20 +61,20 @@ paths:
       summary: find entities json content by pass a json query string via payload
       tags:
       - Entity
-  /api/entity/insert/{entity}:
+  /api/entity/insert/{entityName}:
     post:
       consumes:
       - application/json
       parameters:
       - description: entity name for incoming entity data
         in: path
-        name: entity
+        name: entityName
         required: true
         type: string
       - description: entity json data for uploading
         format: binary
         in: body
-        name: data
+        name: entityData
         required: true
         schema:
           type: string
