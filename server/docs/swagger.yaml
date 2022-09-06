@@ -39,7 +39,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: '[text] value or [html] value on json payload'
+      - description: '[text] value or [html] value in json payload'
         in: path
         name: valType
         required: true

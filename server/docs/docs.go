@@ -74,7 +74,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "[text] value or [html] value on json payload",
+                        "description": "[text] value or [html] value in json payload",
                         "name": "valType",
                         "in": "path",
                         "required": true
