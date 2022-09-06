@@ -15,8 +15,8 @@ github.com/digisan/db-helper v0.0.11 h1:ONeABY/zgPYX4Vid2igUJSaD9baWrGMT3dbmA0bW
 github.com/digisan/db-helper v0.0.11/go.mod h1:zir4xbj/kYDy4mcstI9yRlFh+QjKeL7btztcE3wXTfc=
 github.com/digisan/go-generics v0.2.2 h1:5ec8h+H6YVCdzxra5VDm3SHdgcdtRwWgFQrfF7QsCK8=
 github.com/digisan/go-generics v0.2.2/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
-github.com/digisan/gotk v0.1.19 h1:iaurf6KAfS/ZcpvWKCAYyA3ujkOR24kPjn3BEZp1EIs=
-github.com/digisan/gotk v0.1.19/go.mod h1:M0Micg4lEXeqtQX7D/524IqF6tllpk3gqsdEOOI+Gxk=
+github.com/digisan/gotk v0.1.20 h1:ERdxpOgt+BgQQafVfLH1N+kEINRWck49fnFH9j6IRxI=
+github.com/digisan/gotk v0.1.20/go.mod h1:DXDqcHRqQgELT71674pjB/nshczVM40I9OG7oKHlBwE=
 github.com/digisan/json-tool v0.1.6 h1:P45q40by0/HcjkNAsUlOtz5LywMcSe4JSkjqDjTB8LM=
 github.com/digisan/json-tool v0.1.6/go.mod h1:XDKMbw/UBLB7WwdFyftPcZa9Qv5J2/HZ9sZsloxye5s=
 github.com/digisan/logkit v0.1.0 h1:UIA3VFM8i7XAD6RsXoR8FaHo2kXCIOlM4rQJyh6RlFQ=

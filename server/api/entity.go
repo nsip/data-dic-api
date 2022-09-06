@@ -14,11 +14,9 @@ func EntityHandler(r *echo.Group) {
 		"/find": entity.Find,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
-		"/upsert/:entityName": entity.Upsert,
+		"/upsert/:valType": entity.Upsert,
 	}
-	var mPUT = map[string]echo.HandlerFunc{
-		"/db": entity.UseDbCol,
-	}
+	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{}
 	var mPATCH = map[string]echo.HandlerFunc{}
 

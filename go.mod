@@ -5,13 +5,14 @@ go 1.19
 require (
 	github.com/digisan/db-helper v0.0.11
 	github.com/digisan/go-generics v0.2.2
-	github.com/digisan/gotk v0.1.19
+	github.com/digisan/gotk v0.1.20
 	github.com/digisan/json-tool v0.1.6
 	github.com/digisan/logkit v0.1.0
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/postfinance/single v0.0.2
 	github.com/swaggo/echo-swagger v1.3.4
 	github.com/swaggo/swag v1.8.5
+	github.com/tidwall/gjson v1.14.3
 	go.mongodb.org/mongo-driver v1.10.1
 )
 
@@ -36,7 +37,6 @@ require (
 	github.com/montanaflynn/stats v0.6.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
-	github.com/tidwall/gjson v1.14.3 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect

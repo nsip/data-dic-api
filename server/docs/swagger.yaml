@@ -10,33 +10,6 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
-  /api/entity/db:
-    put:
-      consumes:
-      - multipart/form-data
-      parameters:
-      - default: dictionary
-        description: database name
-        in: formData
-        name: database
-        required: true
-        type: string
-      - default: entity
-        description: collection name
-        in: formData
-        name: collection
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK - set db successfully
-        "400":
-          description: Fail - invalid fields
-      summary: set mongodb database and collection for entity storage
-      tags:
-      - Entity
   /api/entity/find:
     get:
       consumes:
@@ -61,20 +34,20 @@ paths:
       summary: find entities json content by pass a json query string via payload
       tags:
       - Entity
-  /api/entity/insert/{entityName}:
+  /api/entity/upsert/{valType}:
     post:
       consumes:
       - application/json
       parameters:
-      - description: entity name for incoming entity data
+      - description: '[text] value or [html] value on json payload'
         in: path
-        name: entityName
+        name: valType
         required: true
         type: string
       - description: entity json data for uploading
         format: binary
         in: body
-        name: entityData
+        name: entity
         required: true
         schema:
           type: string

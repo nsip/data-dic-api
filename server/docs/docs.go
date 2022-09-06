@@ -22,46 +22,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/entity/db": {
-            "put": {
-                "consumes": [
-                    "multipart/form-data"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Entity"
-                ],
-                "summary": "set mongodb database and collection for entity storage",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "default": "dictionary",
-                        "description": "database name",
-                        "name": "database",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "entity",
-                        "description": "collection name",
-                        "name": "collection",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK - set db successfully"
-                    },
-                    "400": {
-                        "description": "Fail - invalid fields"
-                    }
-                }
-            }
-        },
         "/api/entity/find": {
             "get": {
                 "consumes": [
@@ -99,7 +59,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/entity/insert/{entityName}": {
+        "/api/entity/upsert/{valType}": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -114,15 +74,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "entity name for incoming entity data",
-                        "name": "entityName",
+                        "description": "[text] value or [html] value on json payload",
+                        "name": "valType",
                         "in": "path",
                         "required": true
                     },
                     {
                         "format": "binary",
                         "description": "entity json data for uploading",
-                        "name": "entityData",
+                        "name": "entity",
                         "in": "body",
                         "required": true,
                         "schema": {
