@@ -9,6 +9,8 @@ rm -rf ./server/server
 rm -rf ./server/tmp*
 # rm -rf ./server/data
 
+rm -rf ./data/out
+
 if [[ $1 == 'all' ]] 
 then
 
