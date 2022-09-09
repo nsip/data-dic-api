@@ -23,7 +23,7 @@ func (cfg Config) String() string {
 }
 
 const (
-	DataDir = "./data/entities"
+	DataDir = "./data/inbound/entities"
 )
 
 var (

@@ -10,6 +10,8 @@ W=`tput sgr0`
 GOARCH=amd64
 LDFLAGS="-s -w"
 OUT=process
+# TM=`date +%F@%T@%Z`
+# OUT=process\($TM\)
 
 CGO_ENABLED=0 GOOS="linux" GOARCH="$GOARCH" go build -ldflags="$LDFLAGS" -o $OUT
 

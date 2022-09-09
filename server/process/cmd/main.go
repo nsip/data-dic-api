@@ -25,7 +25,7 @@ func main() {
 	var (
 		wholePtr = flag.Bool("whole", false, "true: for whole process, including 'rename'; otherwise only 'process'")
 
-		root = "../../../data/"
+		root = "./data/"
 
 		// rename
 		dirOriEntPtr = flag.String("oed", filepath.Join(root, "original"), "original entities json data directory")

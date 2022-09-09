@@ -23,7 +23,7 @@ func (cfg Config) String() string {
 }
 
 const (
-	DataDir = "./data/collections"
+	DataDir = "./data/inbound/collections"
 )
 
 var (
