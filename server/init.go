@@ -9,6 +9,7 @@ import (
 	"time"
 
 	mh "github.com/digisan/db-helper/mongo"
+	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
 	"github.com/tidwall/gjson"
 )
@@ -33,20 +34,34 @@ func init() {
 	}()
 
 	select {
-	case <-time.After(3 * time.Second):
+	case <-time.After(5 * time.Second):
 		fmt.Println("timed out for process")
 	case x := <-ch:
 		lk.FailOnErr("%v", x.err)
 
-		// ingest existing entity json files
-		ingestExistingEntities("./data/renamed", dbName, "entities")
+		// ingest existing entities json files
+		lk.FailOnErr("%v", ingestFromDir(dbName, "entities", "./data/out", "Entity", "class-link.json", "collection-entities.json"))
 
-		// ingestClassLinkage
-		ingestClassLinkage("../data/out/class-link.json", dbName, "class")
+		// ingest Entity ClassLinkage
+		lk.FailOnErr("%v", ingestFromFile(dbName, "class", "./data/out/class-link.json", "ver"))
+
+		// ingest Entities PathVal
+		lk.FailOnErr("%v", ingestFromDir(dbName, "pathval", "./data/out/path_val", "Entity"))
+
+		//////////////////////////////
+
+		// ingest Collections
+		lk.FailOnErr("%v", ingestFromDir(dbName, "collections", "./data/out/collections", "Entity", "class-link.json", "collection-entities.json"))
+
+		// ingest Collections PathVal
+		lk.FailOnErr("%v", ingestFromDir(dbName, "pathval", "./data/out/collections/path_val", "Entity"))
+
+		// ingest Collection-Entities
+		lk.FailOnErr("%v", ingestFromFile(dbName, "colentities", "./data/out/collection-entities.json", "ver"))
 	}
 }
 
-func ingestExistingEntities(dpath, db, col string) error {
+func ingestFromDir(db, col, dpath, idfield string, exclfiles ...string) error {
 
 	des, err := os.ReadDir(dpath)
 	if err != nil {
@@ -55,11 +70,14 @@ func ingestExistingEntities(dpath, db, col string) error {
 
 	mh.UseDbCol(db, col)
 
-	nEntity := 0
+	nFile := 0
 	for _, de := range des {
 		fpath := filepath.Join(dpath, de.Name())
 
 		if !strings.HasSuffix(fpath, ".json") {
+			continue
+		}
+		if In(de.Name(), exclfiles...) {
 			continue
 		}
 
@@ -67,9 +85,11 @@ func ingestExistingEntities(dpath, db, col string) error {
 		if err != nil {
 			return err
 		}
-		entity := gjson.Get(string(data), "Entity").String()
-		if len(entity) == 0 {
-			return fmt.Errorf("entity value is empty, invalid file@ %v", fpath)
+
+		id := gjson.Get(string(data), idfield).String()
+		if len(id) == 0 {
+			lk.Warn("ID(%v) value is empty, file@ %v, ignored", idfield, fpath)
+			continue
 		}
 
 		file, err := os.Open(fpath)
@@ -77,7 +97,7 @@ func ingestExistingEntities(dpath, db, col string) error {
 			return err
 		}
 
-		result, _, err := mh.Upsert(file, "Entity", entity)
+		result, _, err := mh.Upsert(file, idfield, id)
 		if err != nil {
 			return err
 		}
@@ -87,15 +107,41 @@ func ingestExistingEntities(dpath, db, col string) error {
 			return err
 		}
 
-		nEntity++
+		nFile++
 	}
 
-	fmt.Printf("all %d entities have been ingested or replaced\n", nEntity)
-
+	lk.Log("all [%d] files have been ingested or updated\n", nFile)
 	return nil
 }
 
-func ingestClassLinkage(fpath, db, col string) error {
-	panic("TODO:")
+func ingestFromFile(db, col, fpath, idfield string) error {
+
+	if !strings.HasSuffix(fpath, ".json") {
+		return nil
+	}
+
+	data, err := os.ReadFile(fpath)
+	if err != nil {
+		return err
+	}
+
+	id := gjson.Get(string(data), idfield).String()
+	if len(id) == 0 {
+		lk.Log("ID(%v) value is empty, file@ %v, to do insert", idfield, fpath)
+	}
+
+	file, err := os.Open(fpath)
+	if err != nil {
+		return err
+	}
+
+	mh.UseDbCol(db, col)
+
+	_, _, err = mh.Upsert(file, idfield, id)
+	if err != nil {
+		return err
+	}
+
+	lk.Log("[%v] has been updated", col)
 	return nil
 }

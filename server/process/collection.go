@@ -9,9 +9,10 @@ import (
 
 	lk "github.com/digisan/logkit"
 	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
-func DumpCollection(dir, ofname string) {
+func DumpCollection(dir, ofname, idfield string, idvalue any) {
 	mColEntities := make(map[string][]string)
 	fis, err := os.ReadDir(dir)
 	lk.FailOnErr("%v", err)
@@ -30,5 +31,7 @@ func DumpCollection(dir, ofname string) {
 	}
 	bytesJS, err := json.Marshal(mColEntities)
 	lk.FailOnErr("%v", err)
-	lk.FailOnErr("%v", os.WriteFile(filepath.Join(dir, ofname), bytesJS, os.ModePerm))
+	js, err := sjson.Set(string(bytesJS), idfield, idvalue)
+	lk.FailOnErr("%v", err)
+	lk.FailOnErr("%v", os.WriteFile(filepath.Join(dir, ofname), []byte(js), os.ModePerm))
 }

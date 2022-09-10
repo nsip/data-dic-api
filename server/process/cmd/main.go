@@ -121,12 +121,12 @@ func main() {
 
 		proc.Preproc(dir, out, errfolder)
 
-		proc.DumpClassLinkage(out, "class-link.json")
+		proc.DumpClassLinkage(out, "class-link.json", "ver", "0.0.1")
 
 		proc.DumpPathValue(out, "path_val")
 
 		if I == 0 {
-			proc.DumpCollection(out, "collection-entities.json")
+			proc.DumpCollection(out, "collection-entities.json", "ver", "0.0.1")
 		}
 	}
 

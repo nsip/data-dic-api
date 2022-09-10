@@ -234,11 +234,13 @@ func Link2JSON(linkCol []string, path string) (out string, err error) {
 	return out, nil // change "." to "[dot]" from each key, otherwise, mongodb stores unexpected...
 }
 
-func DumpClassLinkage(idir, ofname string) {
+func DumpClassLinkage(idir, ofname, idfield string, idvalue any) {
 	files, _, err := fd.WalkFileDir(idir, false)
 	lk.FailOnErr("%v", err)
 	linkCol := LinkEntities(files...)
 	js, err := Link2JSON(linkCol, "")
+	lk.FailOnErr("%v", err)
+	js, err = sjson.Set(js, idfield, idvalue)
 	lk.FailOnErr("%v", err)
 	lk.FailOnErr("%v", os.WriteFile(filepath.Join(idir, ofname), []byte(js), os.ModePerm))
 }
