@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/entity/find": {
+        "/api/entity/entities": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -33,25 +33,32 @@ const docTemplate = `{
                 "tags": [
                     "Entity"
                 ],
-                "summary": "find entities json content by pass a json query string via payload",
-                "parameters": [
-                    {
-                        "format": "binary",
-                        "description": "json data for query",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
+                "summary": "get all entities's full content",
                 "responses": {
                     "200": {
-                        "description": "OK - find successfully"
+                        "description": "OK - get successfully"
                     },
-                    "400": {
-                        "description": "Fail - invalid parameters or request body"
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/entity/list_names": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "list all entity names",
+                "responses": {
+                    "200": {
+                        "description": "OK - list successfully"
                     },
                     "500": {
                         "description": "Fail - internal error"

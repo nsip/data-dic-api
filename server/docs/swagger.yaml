@@ -10,28 +10,32 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
-  /api/entity/find:
+  /api/entity/entities:
     get:
       consumes:
       - application/json
-      parameters:
-      - description: json data for query
-        format: binary
-        in: body
-        name: data
-        required: true
-        schema:
-          type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK - find successfully
-        "400":
-          description: Fail - invalid parameters or request body
+          description: OK - get successfully
         "500":
           description: Fail - internal error
-      summary: find entities json content by pass a json query string via payload
+      summary: get all entities's full content
+      tags:
+      - Entity
+  /api/entity/list_names:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "500":
+          description: Fail - internal error
+      summary: list all entity names
       tags:
       - Entity
   /api/entity/upsert/{valType}:

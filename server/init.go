@@ -43,7 +43,7 @@ func init() {
 		lk.FailOnErr("%v", ingestFromDir(dbName, "entities", "./data/out", "Entity", "class-link.json", "collection-entities.json"))
 
 		// ingest Entity ClassLinkage
-		lk.FailOnErr("%v", ingestFromFile(dbName, "class", "./data/out/class-link.json", "ver"))
+		lk.FailOnErr("%v", ingestFromFile(dbName, "class", "./data/out/class-link.json", "RefName"))
 
 		// ingest Entities PathVal
 		lk.FailOnErr("%v", ingestFromDir(dbName, "pathval", "./data/out/path_val", "Entity"))
@@ -57,7 +57,7 @@ func init() {
 		lk.FailOnErr("%v", ingestFromDir(dbName, "pathval", "./data/out/collections/path_val", "Entity"))
 
 		// ingest Collection-Entities
-		lk.FailOnErr("%v", ingestFromFile(dbName, "colentities", "./data/out/collection-entities.json", "ver"))
+		lk.FailOnErr("%v", ingestFromFile(dbName, "colentities", "./data/out/collection-entities.json", "RefName"))
 	}
 }
 
@@ -97,11 +97,11 @@ func ingestFromDir(db, col, dpath, idfield string, exclfiles ...string) error {
 			return err
 		}
 
-		result, _, err := mh.Upsert(file, idfield, id)
+		_, _, err = mh.Upsert(file, idfield, id)
 		if err != nil {
 			return err
 		}
-		lk.Log("ingesting... %v", result)
+		lk.Log("ingesting... %v", id)
 
 		if err := file.Close(); err != nil {
 			return err
@@ -110,7 +110,7 @@ func ingestFromDir(db, col, dpath, idfield string, exclfiles ...string) error {
 		nFile++
 	}
 
-	lk.Log("all [%d] files have been ingested or updated\n", nFile)
+	lk.Log("all [%d] files have been ingested or updated", nFile)
 	return nil
 }
 
@@ -142,6 +142,6 @@ func ingestFromFile(db, col, fpath, idfield string) error {
 		return err
 	}
 
-	lk.Log("[%v] has been updated", col)
+	lk.Log("[%v] has been updated on [%v]", id, col)
 	return nil
 }

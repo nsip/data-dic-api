@@ -16,6 +16,39 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+// @Title find entity json
+// @Summary find entities json content by pass a json query string via payload
+// @Description
+// @Tags    Entity
+// @Accept  json
+// @Produce json
+// @Param   data body string true "json data for query" Format(binary)
+// @Success 200 "OK - find successfully"
+// @Failure 400 "Fail - invalid parameters or request body"
+// @Failure 500 "Fail - internal error"
+// @Router /api/entity/find [get]
+// func Find(c echo.Context) error {
+
+// 	lk.Log("Enter: Find")
+
+// 	var (
+// 		qryRdr = c.Request().Body
+// 	)
+
+// 	if qryRdr != nil {
+// 		defer qryRdr.Close()
+// 	} else {
+// 		return c.String(http.StatusBadRequest, "payload for query is empty")
+// 	}
+
+// 	results, err := mh.Find[EntityType](qryRdr)
+// 	if err != nil {
+// 		return c.String(http.StatusInternalServerError, err.Error())
+// 	}
+
+// 	return c.JSON(http.StatusOK, results)
+// }
+
 // @Title insert or update one entity data
 // @Summary insert or update one entity data by a json file
 // @Description
@@ -47,8 +80,7 @@ func Upsert(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "valType only can be [text html]")
 	}
 
-	col := IF(flagHtml, cfg.colHtml, cfg.colText)
-	mh.UseDbCol(cfg.db, col)
+	mh.UseDbCol(cfg.db, IF(flagHtml, cfg.colHtml, cfg.colText))
 
 	if dataRdr != nil {
 		defer dataRdr.Close()
@@ -86,45 +118,40 @@ func Upsert(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "error in writing file: "+err.Error())
 		}
 	}
-
 	return c.JSON(http.StatusOK, IdOrCnt)
 }
 
-// @Title find entity json
-// @Summary find entities json content by pass a json query string via payload
+// @Title get all entities
+// @Summary get all entities's full content
 // @Description
 // @Tags    Entity
 // @Accept  json
 // @Produce json
-// @Param   data body string true "json data for query" Format(binary)
-// @Success 200 "OK - find successfully"
-// @Failure 400 "Fail - invalid parameters or request body"
+// @Success 200 "OK - get successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/entity/find [get]
-func Find(c echo.Context) error {
-
-	lk.Log("Enter: Find")
-
-	var (
-		qryRdr = c.Request().Body
-	)
-
-	if qryRdr != nil {
-		defer qryRdr.Close()
-	} else {
-		return c.String(http.StatusBadRequest, "payload for query is empty")
-	}
-
-	results, err := mh.Find[EntityType](qryRdr)
+// @Router /api/entity/entities [get]
+func AllEntities(c echo.Context) error {
+	entities, err := allEntities()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-
-	return c.JSON(http.StatusOK, results)
+	return c.JSON(http.StatusOK, entities)
 }
 
-// func AllEntityNames(c echo.Context) error {
-// }
-
-// func AllEntities(c echo.Context) error {
-// }
+// @Title list all entity names
+// @Summary list all entity names
+// @Description
+// @Tags    Entity
+// @Accept  json
+// @Produce json
+// @Success 200 "OK - list successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/entity/list_names [get]
+func AllEntityNames(c echo.Context) error {
+	entities, err := allEntities()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	names := FilterMap(entities, nil, func(i int, e *EntityType) string { return e.Entity })
+	return c.JSON(http.StatusOK, names)
+}

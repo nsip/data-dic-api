@@ -9,7 +9,7 @@ type EntityType struct {
 	Entity     string
 	OtherNames []string
 	Definition string
-	SIF        struct {
+	SIF        []struct {
 		XPath      []string
 		Definition string
 		Commentary string
@@ -25,7 +25,7 @@ type EntityType struct {
 	LegalDefinitions []struct {
 		LegislationName string
 		Citation        string
-		Link            []string
+		Link            string
 		Definition      string
 		Commentary      string
 		Datestamp       string
@@ -41,7 +41,7 @@ type EntityType struct {
 		Identifier         string
 		Type               string
 		ExpectedAttributes []string
-		Superclass         string
+		Superclass         []string
 		CrossrefEntities   []string
 	}
 }
