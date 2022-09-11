@@ -12,7 +12,7 @@ func EntityHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
 		// "/find": entity.Find,
-		"/entities":  entity.AllEntities,
+		"/entities":   entity.AllEntities,
 		"/list_names": entity.AllEntityNames,
 	}
 	var mPOST = map[string]echo.HandlerFunc{

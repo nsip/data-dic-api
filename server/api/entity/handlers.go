@@ -13,6 +13,7 @@ import (
 	"github.com/digisan/gotk/strs"
 	lk "github.com/digisan/logkit"
 	"github.com/labstack/echo/v4"
+	in "github.com/nsip/data-dic-api/server/ingest"
 	"github.com/tidwall/gjson"
 )
 
@@ -113,13 +114,30 @@ func Upsert(c echo.Context) error {
 
 	// save inbound json file to local folder
 	if len(data) > 0 {
+
+		// TO inbound
 		dir := IF(flagHtml, cfg.dirHtml, cfg.dirText)
 		if err := os.WriteFile(filepath.Join(dir, entityName+".json"), data, os.ModePerm); err != nil {
-			return c.String(http.StatusInternalServerError, "error in writing file: "+err.Error())
+			return c.String(http.StatusInternalServerError, "error in writing file to inbound: "+err.Error())
+		}
+
+		// TO renamed
+		if !flagHtml {
+			dir := cfg.dirExisting
+			if err := os.WriteFile(filepath.Join(dir, entityName+".json"), data, os.ModePerm); err != nil {
+				return c.String(http.StatusInternalServerError, "error in writing file to existing directory: "+err.Error())
+			}
+		}
+
+		// Re ingest all
+		if err := in.Ingest(); err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
 		}
 	}
 	return c.JSON(http.StatusOK, IdOrCnt)
 }
+
+/////////////////////////////////////// FOR NEXT FRONTEND VERSION ///////////////////////////////////////
 
 // @Title get all entities
 // @Summary get all entities's full content
