@@ -3,14 +3,13 @@ package process
 import (
 	"errors"
 	"os"
-	"path/filepath"
 
 	fd "github.com/digisan/gotk/filedir"
 	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
 )
 
-func Do(root, dirRnEnt, dirInEnt, dirOutEnt, dirErrEnt, dirRnCol, dirInCol, dirOutCol, dirErrCol string) error {
+func Do(dirRnEnt, dirInEnt, dirOutEnt, dirErrEnt, dirRnCol, dirInCol, dirOutCol, dirErrCol string) error {
 
 	if !fd.DirExists(dirRnEnt) || !fd.DirExists(dirRnCol) {
 		err := errors.New("input 'Renamed' Dirs are NOT existing for Processing")
@@ -69,18 +68,31 @@ func Do(root, dirRnEnt, dirInEnt, dirOutEnt, dirErrEnt, dirRnCol, dirInCol, dirO
 
 	// ------------------------------------------------------------------------------------- //
 
-	// remove error folder for empty error files
-	errdir := filepath.Join(root, dirErrEnt)
-	fpaths, _, err := fd.WalkFileDir(errdir, true)
+	// remove error folder for empty error files, collection error folder can be also deleted here!
+
+	fpaths, _, err := fd.WalkFileDir(dirErrEnt, true)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 	if len(fpaths) == 0 {
-		if err := os.RemoveAll(errdir); err != nil {
+		if err := os.RemoveAll(dirErrEnt); err != nil {
 			lk.WarnOnErr("%v", err)
 			return err
 		}
 	}
+
+	// fpaths, _, err = fd.WalkFileDir(dirErrCol, true)
+	// if err != nil {
+	// 	lk.WarnOnErr("%v", err)
+	// 	return err
+	// }
+	// if len(fpaths) == 0 {
+	// 	if err := os.RemoveAll(dirErrCol); err != nil {
+	// 		lk.WarnOnErr("%v", err)
+	// 		return err
+	// 	}
+	// }
+
 	return nil
 }

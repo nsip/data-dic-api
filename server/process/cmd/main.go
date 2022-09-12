@@ -96,5 +96,5 @@ func main() {
 
 	// ------------------------------------------------------------------------------------- //
 
-	lk.FailOnErr("%v", proc.Do(root, *dirRnEntPtr, *dirInEntPtr, *dirOutEntPtr, *dirErrEntPtr, *dirRnColPtr, *dirInColPtr, *dirOutColPtr, *dirErrColPtr))
+	lk.FailOnErr("%v", proc.Do(*dirRnEntPtr, *dirInEntPtr, *dirOutEntPtr, *dirErrEntPtr, *dirRnColPtr, *dirInColPtr, *dirOutColPtr, *dirErrColPtr))
 }

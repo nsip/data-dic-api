@@ -10,6 +10,111 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
+  /api/collection/clear_all:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - deleted successfully
+        "500":
+          description: Fail - internal error
+      summary: delete all collections (dangerous)
+      tags:
+      - Collection
+  /api/collection/collections:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - get successfully
+        "500":
+          description: Fail - internal error
+      summary: get all collections' full content
+      tags:
+      - Collection
+  /api/collection/name:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: collection's entity name for collection deleting
+        in: query
+        name: collection
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - deleted successfully
+        "500":
+          description: Fail - internal error
+      summary: delete one collection by its name
+      tags:
+      - Collection
+  /api/collection/names:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "500":
+          description: Fail - internal error
+      summary: list all collection names
+      tags:
+      - Collection
+  /api/collection/upsert/{valType}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '[text] value or [html] value in json payload'
+        in: path
+        name: valType
+        required: true
+        type: string
+      - description: collection json data for uploading
+        format: binary
+        in: body
+        name: collection
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - insert or update successfully
+        "400":
+          description: Fail - invalid parameters or request body
+        "500":
+          description: Fail - internal error
+      summary: insert or update one collection data by a json file
+      tags:
+      - Collection
+  /api/entity/clear_all:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - deleted successfully
+        "500":
+          description: Fail - internal error
+      summary: delete all entities (dangerous)
+      tags:
+      - Entity
   /api/entity/entities:
     get:
       consumes:
@@ -24,7 +129,27 @@ paths:
       summary: get all entities's full content
       tags:
       - Entity
-  /api/entity/list_names:
+  /api/entity/name:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: entity name for entity deleting
+        in: query
+        name: entity
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - deleted successfully
+        "500":
+          description: Fail - internal error
+      summary: delete one entity by its name
+      tags:
+      - Entity
+  /api/entity/names:
     get:
       consumes:
       - application/json

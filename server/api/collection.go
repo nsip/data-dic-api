@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	// "github.com/nsip/data-dic-api/server/api/collection"
+	"github.com/nsip/data-dic-api/server/api/collection"
 )
 
 // register to main echo Group
@@ -10,10 +10,18 @@ import (
 // "/api/collection"
 func CollectionHandler(r *echo.Group) {
 
-	var mGET = map[string]echo.HandlerFunc{}
-	var mPOST = map[string]echo.HandlerFunc{}
+	var mGET = map[string]echo.HandlerFunc{
+		"/collections": collection.AllCollections,
+		"/names":       collection.AllCollectionNames,
+	}
+	var mPOST = map[string]echo.HandlerFunc{
+		"/upsert/:valType": collection.Upsert,
+	}
 	var mPUT = map[string]echo.HandlerFunc{}
-	var mDELETE = map[string]echo.HandlerFunc{}
+	var mDELETE = map[string]echo.HandlerFunc{
+		"/name":      collection.Delete,
+		"/clear_all": collection.ClearAll,
+	}
 	var mPATCH = map[string]echo.HandlerFunc{}
 
 	// ------------------------------------------------------- //

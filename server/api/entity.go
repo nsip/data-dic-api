@@ -12,14 +12,17 @@ func EntityHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
 		// "/find": entity.Find,
-		"/entities":   entity.AllEntities,
-		"/list_names": entity.AllEntityNames,
+		"/entities": entity.AllEntities,
+		"/names":    entity.AllEntityNames,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
 		"/upsert/:valType": entity.Upsert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{}
-	var mDELETE = map[string]echo.HandlerFunc{}
+	var mDELETE = map[string]echo.HandlerFunc{
+		"/name":      entity.Delete,
+		"/clear_all": entity.ClearAll,
+	}
 	var mPATCH = map[string]echo.HandlerFunc{}
 
 	// ------------------------------------------------------- //

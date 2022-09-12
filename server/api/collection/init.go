@@ -9,11 +9,12 @@ import (
 )
 
 type Config struct {
-	db      string
-	colText string
-	colHtml string
-	dirText string
-	dirHtml string
+	db          string
+	colText     string
+	colHtml     string
+	dirText     string
+	dirHtml     string
+	dirExisting string
 }
 
 func (cfg Config) String() string {
@@ -28,11 +29,12 @@ const (
 
 var (
 	cfg = Config{
-		db:      "dictionaryTest",
-		colText: "collections_text",
-		colHtml: "collections_html",
-		dirText: filepath.Join(DataDir, "text"),
-		dirHtml: filepath.Join(DataDir, "html"),
+		db:          "dictionaryTest",
+		colText:     "collections_text",
+		colHtml:     "collections_html",
+		dirText:     filepath.Join(DataDir, "text"),
+		dirHtml:     filepath.Join(DataDir, "html"),
+		dirExisting: "./data/renamed/collections",
 	}
 )
 

@@ -2,6 +2,7 @@ package entity
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -172,12 +173,57 @@ func AllEntities(c echo.Context) error {
 // @Produce json
 // @Success 200 "OK - list successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/entity/list_names [get]
+// @Router /api/entity/names [get]
 func AllEntityNames(c echo.Context) error {
-	entities, err := allEntities()
+	names, err := allEntityNames()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-	names := FilterMap(entities, nil, func(i int, e *EntityType) string { return e.Entity })
 	return c.JSON(http.StatusOK, names)
+}
+
+// @Title delete one entity
+// @Summary delete one entity by its name
+// @Description
+// @Tags    Entity
+// @Accept  json
+// @Produce json
+// @Param   entity query string true "entity name for entity deleting"
+// @Success 200 "OK - deleted successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/entity/name [delete]
+func Delete(c echo.Context) error {
+	var (
+		entity = c.QueryParam("entity")
+	)
+	n, _, err := mh.DeleteOne[EntityType](strings.NewReader(fmt.Sprintf(`"Entity": "%v"`, entity)))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, struct{ CountDeleted int }{n})
+}
+
+// @Title delete all entities
+// @Summary delete all entities (dangerous)
+// @Description
+// @Tags    Entity
+// @Accept  json
+// @Produce json
+// @Success 200 "OK - deleted successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/entity/clear_all [delete]
+func ClearAll(c echo.Context) error {
+	names, err := allEntityNames()
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	total := 0
+	for _, name := range names {
+		n, _, err := mh.Delete[EntityType](strings.NewReader(fmt.Sprintf(`"Entity": "%v"`, name)))
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		total += n
+	}
+	return c.JSON(http.StatusOK, struct{ CountDeleted int }{total})
 }

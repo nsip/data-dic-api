@@ -14,6 +14,169 @@
     },
     "host": "127.0.0.1:1323",
     "paths": {
+        "/api/collection/clear_all": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Collection"
+                ],
+                "summary": "delete all collections (dangerous)",
+                "responses": {
+                    "200": {
+                        "description": "OK - deleted successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/collection/collections": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Collection"
+                ],
+                "summary": "get all collections' full content",
+                "responses": {
+                    "200": {
+                        "description": "OK - get successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/collection/name": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Collection"
+                ],
+                "summary": "delete one collection by its name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "collection's entity name for collection deleting",
+                        "name": "collection",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - deleted successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/collection/names": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Collection"
+                ],
+                "summary": "list all collection names",
+                "responses": {
+                    "200": {
+                        "description": "OK - list successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/collection/upsert/{valType}": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Collection"
+                ],
+                "summary": "insert or update one collection data by a json file",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "[text] value or [html] value in json payload",
+                        "name": "valType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "format": "binary",
+                        "description": "collection json data for uploading",
+                        "name": "collection",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - insert or update successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters or request body"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/entity/clear_all": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "delete all entities (dangerous)",
+                "responses": {
+                    "200": {
+                        "description": "OK - deleted successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/entity/entities": {
             "get": {
                 "consumes": [
@@ -36,7 +199,38 @@
                 }
             }
         },
-        "/api/entity/list_names": {
+        "/api/entity/name": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "delete one entity by its name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "entity name for entity deleting",
+                        "name": "entity",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - deleted successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/entity/names": {
             "get": {
                 "consumes": [
                     "application/json"
