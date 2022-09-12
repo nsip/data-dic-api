@@ -14,18 +14,30 @@ import (
 	lk "github.com/digisan/logkit"
 )
 
-func GenEntityPathVal(fpaths ...string) map[string]string {
+func GenEntityPathVal(fpaths ...string) (map[string]string, error) {
 	m := make(map[string]string)
 	for _, fpath := range fpaths {
 		if strs.HasAnySuffix(fpath, "class-link.json", "collection-entities.json") {
 			continue
 		}
 		data, err := os.ReadFile(fpath)
-		lk.FailOnErr("%v", err)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return nil, err
+		}
+
 		mPathVal, err := jt.Flatten(data)
-		lk.FailOnErr("%v", err)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return nil, err
+		}
+
 		key, ok := mPathVal["Entity"]
-		lk.FailOnErrWhen(!ok, "%v @ "+fpath, errors.New("entity missing"))
+		if !ok {
+			lk.WarnOnErr("%v @ "+fpath, errors.New("entity missing"))
+			return nil, fmt.Errorf("%v @ "+fpath, "entity missing")
+		}
+
 		// make json
 		js := "{"
 		for path, val := range mPathVal {
@@ -34,18 +46,37 @@ func GenEntityPathVal(fpaths ...string) map[string]string {
 			js += fmt.Sprintf(`"%s": "%s",`, path, val)
 		}
 		js = strings.TrimSuffix(js, ",") + "}"
-		lk.FailOnErrWhen(!jt.IsValidStr(js), "%v @"+fpath, errors.New("invalid path-value json"))
+		if !jt.IsValidStr(js) {
+			lk.WarnOnErr("%v @"+fpath, errors.New("invalid path-value json"))
+			return nil, fmt.Errorf("%v @"+fpath, "invalid path-value json")
+		}
+
 		m[key.(string)] = js
 	}
-	return m
+	return m, nil
 }
 
-func DumpPathValue(idir, odname string) {
+func DumpPathValue(idir, odname string) error {
 	osdir := filepath.Join(idir, odname)
 	gio.MustCreateDir(osdir)
 	fpaths, _, err := fd.WalkFileDir(idir, false)
-	lk.FailOnErr("%v", err)
-	for entity, js := range GenEntityPathVal(fpaths...) {
-		lk.FailOnErr("%v", os.WriteFile(filepath.Join(osdir, entity+".json"), []byte(js), os.ModePerm))
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
 	}
+
+	mEntPathVal, err := GenEntityPathVal(fpaths...)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+
+	for entity, js := range mEntPathVal {
+		err := os.WriteFile(filepath.Join(osdir, entity+".json"), []byte(js), os.ModePerm)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return err
+		}
+	}
+	return nil
 }

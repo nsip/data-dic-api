@@ -92,51 +92,9 @@ func main() {
 			}
 		}
 
-	}
+	} // End wholePtr
 
 	// ------------------------------------------------------------------------------------- //
 
-	if !fd.DirExists(*dirRnEntPtr) || !fd.DirExists(*dirRnColPtr) {
-		lk.FailOnErr("%v", errors.New("input 'Renamed' Dirs are NOT existing for Processing"))
-	}
-
-	mInOut := map[string]string{
-		*dirInEntPtr: *dirOutEntPtr,
-		*dirInColPtr: *dirOutColPtr,
-	}
-	mInErr := map[string]string{
-		*dirInEntPtr: *dirErrEntPtr,
-		*dirInColPtr: *dirErrColPtr,
-	}
-
-	gio.MustCreateDirs(*dirOutEntPtr, *dirOutColPtr, *dirErrEntPtr, *dirErrColPtr)
-
-	for I, dir := range []string{*dirInEntPtr, *dirInColPtr} {
-
-		out := mInOut[dir]       // "out" is final output directory for ingestion
-		errfolder := mInErr[dir] // "err" is for incorrect format json dump into
-
-		lk.FailOnErr("%v", fd.RmFilesIn(out, false, false))
-		lk.FailOnErr("%v", fd.RmFilesIn(errfolder, false, false))
-
-		proc.Preproc(dir, out, errfolder)
-
-		proc.DumpClassLinkage(out, "class-link.json", "RefName", "ClassLinkage")
-
-		proc.DumpPathValue(out, "path_val")
-
-		if I == 0 {
-			proc.DumpCollection(out, "collection-entities.json", "RefName", "CollectionEntities")
-		}
-	}
-
-	// ------------------------------------------------------------------------------------- //
-
-	// remove error folder for empty error files
-	errdir := filepath.Join(root, "err")
-	fpaths, _, err := fd.WalkFileDir(errdir, true)
-	lk.FailOnErr("%v", err)
-	if len(fpaths) == 0 {
-		lk.FailOnErr("%v", os.RemoveAll(errdir))
-	}
+	lk.FailOnErr("%v", proc.Do(root, *dirRnEntPtr, *dirInEntPtr, *dirOutEntPtr, *dirErrEntPtr, *dirRnColPtr, *dirInColPtr, *dirOutColPtr, *dirErrColPtr))
 }

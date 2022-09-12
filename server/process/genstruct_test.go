@@ -16,7 +16,11 @@ func TestGenEntityPathVal(t *testing.T) {
 	gio.MustCreateDir(osdir)
 	fpaths, _, err := fd.WalkFileDir(out, false)
 	lk.FailOnErr("%v", err)
-	for entity, js := range GenEntityPathVal(fpaths...) {
+
+	mEntPathVal, err := GenEntityPathVal(fpaths...)
+	lk.FailOnErr("%v", err)
+
+	for entity, js := range mEntPathVal {
 		lk.FailOnErr("%v", os.WriteFile(filepath.Join(osdir, entity+".json"), []byte(js), os.ModePerm))
 	}
 }

@@ -11,6 +11,7 @@ import (
 	mh "github.com/digisan/db-helper/mongo"
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/strs"
+	tc "github.com/digisan/gotk/type-check"
 	lk "github.com/digisan/logkit"
 	"github.com/labstack/echo/v4"
 	in "github.com/nsip/data-dic-api/server/ingest"
@@ -95,15 +96,22 @@ func Upsert(c echo.Context) error {
 	}
 
 	js := string(data)
+
+	// validate payload
 	entityName := gjson.Get(js, "Entity").String()
-	if len(entityName) == 0 {
-		return c.String(http.StatusBadRequest, "invalid entity json file, 'Entity' field is missing")
-	}
+	entityId := gjson.Get(js, "Metadata.Identifier").String()
 
 	if flagHtml {
 		if strings.HasPrefix(entityName, "<") && strings.HasSuffix(entityName, ">") {
 			entityName = strs.HtmlTextContent(entityName)[0]
 		}
+	}
+
+	switch {
+	case len(entityName) == 0:
+		return c.String(http.StatusBadRequest, "invalid entity json, 'Entity' field is missing")
+	case !flagHtml && !tc.IsNumeric(entityId):
+		return c.String(http.StatusBadRequest, "invalid entity json, 'Metadata.Identifier' field is invalid")
 	}
 
 	// ingest inbound data into db, if entity already exists, replace old one
@@ -130,7 +138,7 @@ func Upsert(c echo.Context) error {
 		}
 
 		// Re ingest all
-		if err := in.Ingest(); err != nil {
+		if err := in.IngestViaCmd(); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 	}

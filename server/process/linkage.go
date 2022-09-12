@@ -33,21 +33,30 @@ func SwapES(m map[string][]string) map[string][]string {
 	return ret
 }
 
-func EntitiesDescArr(fpaths ...string) []map[string][]string {
+func EntitiesDescArr(fpaths ...string) ([]map[string][]string, error) {
 	mEDs := make([]map[string][]string, 0, len(fpaths))
 	for _, path := range fpaths {
 		data, err := os.ReadFile(path)
-		lk.FailOnErr("%v", err)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return nil, err
+		}
+
 		js := string(data)
 		mES := SupClsCol(js)
 		mEDs = append(mEDs, SwapES(mES))
 	}
-	return mEDs
+	return mEDs, nil
 }
 
-func EntityDesc(fpaths ...string) map[string][]string {
+func EntityDesc(fpaths ...string) (map[string][]string, error) {
 
-	mEDs := EntitiesDescArr(fpaths...)
+	mEDs, err := EntitiesDescArr(fpaths...)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return nil, err
+	}
+
 	keys := []string{}
 	for _, mED := range mEDs {
 		for k := range mED {
@@ -73,7 +82,7 @@ func EntityDesc(fpaths ...string) map[string][]string {
 	// mEDsKey["Hillside Campus"] = []string{"Sydenham-Hillside Campus 2"}
 	///
 
-	return mEDsKey
+	return mEDsKey, nil
 }
 
 type List []string
@@ -125,14 +134,19 @@ AGAIN:
 	return linkCol
 }
 
-func LinkEntities(fpaths ...string) (out []string) {
-	mED := EntityDesc(fpaths...)
+func LinkEntities(fpaths ...string) (out []string, err error) {
+	mED, err := EntityDesc(fpaths...)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return nil, err
+	}
+
 	for k := range mED {
 		linkCol := &List{}
 		LinkEntity(MapCopy(mED), k, List{}, linkCol)
 		out = append(out, RmPartialLink(*linkCol)...)
 	}
-	return RmPartialLink(out)
+	return RmPartialLink(out), nil
 }
 
 func TrimEntityPaths(mEntityPaths map[string][]string) map[string][]string {
@@ -227,20 +241,43 @@ func Link2JSON(linkCol []string, path string) (out string, err error) {
 			}
 
 			out, err = sjson.Set(out, entity, node)
-			lk.FailOnErr("%v", err)
+			if err != nil {
+				lk.WarnOnErr("%v", err)
+				return "", err
+			}
 		}
 	}
 
 	return out, nil // change "." to "[dot]" from each key, otherwise, mongodb stores unexpected...
 }
 
-func DumpClassLinkage(idir, ofname, idfield string, idvalue any) {
+func DumpClassLinkage(idir, ofname, idfield string, idvalue any) error {
+
 	files, _, err := fd.WalkFileDir(idir, false)
-	lk.FailOnErr("%v", err)
-	linkCol := LinkEntities(files...)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+
+	linkCol, err := LinkEntities(files...)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+
 	js, err := Link2JSON(linkCol, "")
-	lk.FailOnErr("%v", err)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+
 	js, err = sjson.Set(js, idfield, idvalue)
-	lk.FailOnErr("%v", err)
-	lk.FailOnErr("%v", os.WriteFile(filepath.Join(idir, ofname), []byte(js), os.ModePerm))
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+
+	err = os.WriteFile(filepath.Join(idir, ofname), []byte(js), os.ModePerm)
+	lk.WarnOnErr("%v", err)
+	return err
 }

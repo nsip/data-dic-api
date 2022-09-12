@@ -20,7 +20,7 @@ import (
 )
 
 // make sure each file's name is its entity value
-func FixFileName(datadir, odir string) {
+func FixFileName(datadir, odir string) error {
 
 	files, err := os.ReadDir(datadir)
 	if err != nil {
@@ -46,7 +46,11 @@ func FixFileName(datadir, odir string) {
 			fpathNew := filepath.Join(odir, fname)
 			lk.Log("destination...  %s", fpathNew)
 
-			lk.FailOnErrWhen(fd.FileExists(fpathNew), "%v", fmt.Errorf("[%s] is already existing", fpathNew))
+			if fd.FileExists(fpathNew) {
+				err := fmt.Errorf("[%s] is already existing", fpathNew)
+				lk.WarnOnErr("%v", err)
+				return err
+			}
 
 			// copy
 			if err = os.WriteFile(fpathNew, data, os.ModePerm); err != nil {
@@ -59,6 +63,8 @@ func FixFileName(datadir, odir string) {
 			// }
 		}
 	}
+
+	return nil
 }
 
 // 1) Escape quotation marks used around HTML attributes like so <img src=\"someimage.png\" />
@@ -116,15 +122,22 @@ func rmPtag(ori string) string {
 	return ori
 }
 
-func padIdentifier(ori string, idLen int) string {
+func padIdentifier(ori string, idLen int) (string, error) {
 	idstr := gjson.Get(ori, "Metadata.Identifier").String()
 	id, err := strconv.ParseUint(idstr, 10, 64)
-	lk.FailOnErr("%v", err)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return "", err
+	}
+
 	idfmt := fmt.Sprintf("%%0%dd", idLen)
 	idstr = fmt.Sprintf(idfmt, id)
 	rt, err := sjson.Set(ori, "Metadata.Identifier", idstr)
-	lk.FailOnErr("%v", err)
-	return rt
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return "", err
+	}
+	return rt, nil
 }
 
 // datadir: data-dir; odir: out-dir; edir: err-dir
@@ -157,10 +170,19 @@ func Preproc(datadir, odir, edir string) error {
 				outname := filepath.Base(fpath)
 				out := filepath.Join(edir, outname)
 				os.WriteFile(out, data, os.ModePerm)
-				lk.FailOnErr("%v", fmt.Errorf("json error@ %s", fpath))
+
+				err := fmt.Errorf("json error@ %s", fpath)
+				lk.WarnOnErr("%v", err)
+				return err
 			}
 
-			data = []byte(padIdentifier(string(data), 8))
+			id, err := padIdentifier(string(data), 8)
+			if err != nil {
+				lk.WarnOnErr("%v", err)
+				return err
+			}
+
+			data = []byte(id)
 
 			// save
 			gio.MustCreateDir(odir)

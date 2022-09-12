@@ -6,5 +6,5 @@ import (
 )
 
 func init() {
-	lk.FailOnErr("%v", in.Ingest())
+	lk.FailOnErr("%v", in.IngestViaCmd())
 }

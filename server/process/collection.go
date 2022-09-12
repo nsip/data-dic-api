@@ -12,14 +12,20 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-func DumpCollection(dir, ofname, idfield string, idvalue any) {
+func DumpCollection(dir, ofname, idfield string, idvalue any) error {
 	mColEntities := make(map[string][]string)
 	fis, err := os.ReadDir(dir)
-	lk.FailOnErr("%v", err)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
 	for _, fi := range fis {
 		if fname := fi.Name(); strings.HasSuffix(fname, ".json") {
 			bytesJS, err := os.ReadFile(filepath.Join(dir, fname))
-			lk.FailOnErr("%v", err)
+			if err != nil {
+				lk.WarnOnErr("%v", err)
+				return err
+			}
 			js := string(bytesJS)
 			if r := gjson.Get(js, "Collections"); r.IsArray() {
 				for i := 0; i < len(r.Array()); i++ {
@@ -30,8 +36,16 @@ func DumpCollection(dir, ofname, idfield string, idvalue any) {
 		}
 	}
 	bytesJS, err := json.Marshal(mColEntities)
-	lk.FailOnErr("%v", err)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
 	js, err := sjson.Set(string(bytesJS), idfield, idvalue)
-	lk.FailOnErr("%v", err)
-	lk.FailOnErr("%v", os.WriteFile(filepath.Join(dir, ofname), []byte(js), os.ModePerm))
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+	err = os.WriteFile(filepath.Join(dir, ofname), []byte(js), os.ModePerm)
+	lk.WarnOnErr("%v", err)
+	return err
 }
