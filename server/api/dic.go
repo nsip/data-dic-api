@@ -2,26 +2,26 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/nsip/data-dic-api/server/api/entity"
+	"github.com/nsip/data-dic-api/server/api/dic"
 )
 
 // register to main echo Group
 
-// "/api/entity"
-func EntityHandler(r *echo.Group) {
+// "/api/dictionary"
+func Handler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
-		// "/find": entity.Find,
-		"/entities": entity.AllEntities,
-		"/names":    entity.AllEntityNames,
+		"/all/:itemType":  dic.All,
+		"/list/:itemType": dic.List,
+		"/one":            dic.One,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
-		"/upsert/:valType": entity.Upsert,
+		"/upsert": dic.Upsert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{
-		"/name":      entity.Delete,
-		"/clear_all": entity.ClearAll,
+		"/one":             dic.Delete,
+		"/clear/:itemType": dic.Clear,
 	}
 	var mPATCH = map[string]echo.HandlerFunc{}
 

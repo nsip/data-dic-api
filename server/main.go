@@ -117,12 +117,10 @@ func echoHost(done chan<- string) {
 
 		// other groups with middleware
 		groups := []string{
-			"/api/entity",
-			"/api/collection",
+			"/api/dictionary",
 		}
 		handlers := []func(*echo.Group){
-			api.EntityHandler,
-			api.CollectionHandler,
+			api.Handler,
 		}
 		for i, group := range groups {
 			r := e.Group(group)

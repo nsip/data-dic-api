@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/digisan/db-helper v0.0.11
 	github.com/digisan/go-generics v0.2.2
-	github.com/digisan/gotk v0.1.20
+	github.com/digisan/gotk v0.1.21
 	github.com/digisan/json-tool v0.1.6
 	github.com/digisan/logkit v0.1.0
 	github.com/labstack/echo/v4 v4.9.0
@@ -50,7 +50,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
 	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
 	golang.org/x/sync v0.0.0-20220907140024-f12130a52804 // indirect
-	golang.org/x/sys v0.0.0-20220909162455-aba9fc2a8ff2 // indirect
+	golang.org/x/sys v0.0.0-20220913175220-63ea55921009 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	golang.org/x/tools v0.1.12 // indirect

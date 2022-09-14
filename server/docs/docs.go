@@ -22,29 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/collection/clear_all": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Collection"
-                ],
-                "summary": "delete all collections (dangerous)",
-                "responses": {
-                    "200": {
-                        "description": "OK - deleted successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/collection/collections": {
+        "/api/dictionary/all/{itemType}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -53,9 +31,18 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Collection"
+                    "Dictionary"
                 ],
-                "summary": "get all collections' full content",
+                "summary": "get all entities' or collections' full content",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "item type, only can be 'entity' or 'collection'",
+                        "name": "itemType",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK - get successfully"
@@ -66,7 +53,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/collection/name": {
+        "/api/dictionary/clear/{itemType}": {
             "delete": {
                 "consumes": [
                     "application/json"
@@ -75,14 +62,108 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Collection"
+                    "Dictionary"
                 ],
-                "summary": "delete one collection by its name",
+                "summary": "delete all entities or collections (dangerous)",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "collection's entity name for collection deleting",
-                        "name": "collection",
+                        "description": "item type, only can be 'entity' or 'collection'",
+                        "name": "itemType",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - cleared successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/list/{itemType}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "list all entities' or collections' name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "item type, only can be 'entity' or 'collection'",
+                        "name": "itemType",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - list successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/one": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "get one entity or collection by its 'Entity' name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - got successfully"
+                    },
+                    "404": {
+                        "description": "Fail - not found"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "delete one entity or collection by its 'Entity' name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity name for deleting",
+                        "name": "name",
                         "in": "query",
                         "required": true
                     }
@@ -97,29 +178,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/collection/names": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Collection"
-                ],
-                "summary": "list all collection names",
-                "responses": {
-                    "200": {
-                        "description": "OK - list successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/collection/upsert/{valType}": {
+        "/api/dictionary/upsert": {
             "post": {
                 "consumes": [
                     "application/json"
@@ -128,161 +187,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Collection"
+                    "Dictionary"
                 ],
-                "summary": "insert or update one collection data by a json file",
+                "summary": "insert or update one entity or collection data by json payload",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "[text] value or [html] value in json payload",
-                        "name": "valType",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "format": "binary",
-                        "description": "collection json data for uploading",
-                        "name": "collection",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK - insert or update successfully"
-                    },
-                    "400": {
-                        "description": "Fail - invalid parameters or request body"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/entity/clear_all": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Entity"
-                ],
-                "summary": "delete all entities (dangerous)",
-                "responses": {
-                    "200": {
-                        "description": "OK - deleted successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/entity/entities": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Entity"
-                ],
-                "summary": "get all entities's full content",
-                "responses": {
-                    "200": {
-                        "description": "OK - get successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/entity/name": {
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Entity"
-                ],
-                "summary": "delete one entity by its name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "entity name for entity deleting",
-                        "name": "entity",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK - deleted successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/entity/names": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Entity"
-                ],
-                "summary": "list all entity names",
-                "responses": {
-                    "200": {
-                        "description": "OK - list successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/entity/upsert/{valType}": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Entity"
-                ],
-                "summary": "insert or update one entity data by a json file",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "[text] value or [html] value in json payload",
-                        "name": "valType",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "format": "binary",
-                        "description": "entity json data for uploading",
+                        "description": "entity or collection json data for uploading",
                         "name": "entity",
                         "in": "body",
                         "required": true,
