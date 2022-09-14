@@ -15,3 +15,5 @@
 # vendor/
 
 server/build
+server/api/db/data
+server/data

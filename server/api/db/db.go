@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 	"strings"
 
@@ -16,53 +17,58 @@ func fieldStr[T any](v *T, field string) string {
 	return f.String()
 }
 
-func All[T any](cfg Config) ([]*T, error) {
-
-	// existing db
-	//
-	mh.UseDbCol(cfg.Db, cfg.ColExisting)
-	existing, err := mh.Find[T](nil)
-	if err != nil {
-		return nil, err
+func One[T any](cfg Config, EntityName string, fuzzy bool) (*T, error) {
+	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, EntityName)
+	if fuzzy {
+		sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, EntityName)
 	}
-	return existing, nil
-}
-
-func List[T any](cfg Config) ([]string, error) {
-	all, err := All[T](cfg)
-	if err != nil {
-		return nil, err
-	}
-	return FilterMap(all, nil, func(i int, e *T) string { return fieldStr(e, "Entity") }), nil
-}
-
-func One[T any](cfg Config, entityName string) (*T, error) {
-
-	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, entityName)
 	lk.Log("sFilter %v", sFilter)
 
 	// existing db
 	//
 	mh.UseDbCol(cfg.Db, cfg.ColExisting)
-	existing, err := mh.FindOne[T](strings.NewReader(sFilter))
+	found, err := mh.FindOne[T](strings.NewReader(sFilter))
 	if err != nil {
 		return nil, err
 	}
-	if existing != nil {
-		return existing, nil
-	}
-	return nil, nil
+	return found, nil
 }
 
-func Del[T any](cfg Config, entityName string) (int, error) {
+func Many[T any](cfg Config, EntityName string) ([]*T, error) {
+	var rFilter io.Reader = nil // NOT using "*strings.Reader = nil" as nil interface
+	if len(EntityName) > 0 {
+		sFilter := fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, EntityName)
+		lk.Log("sFilter %v", sFilter)
+		rFilter = strings.NewReader(sFilter)
+	}
 
-	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, entityName)
+	// existing db
+	//
+	mh.UseDbCol(cfg.Db, cfg.ColExisting)
+	found, err := mh.Find[T](rFilter)
+	if err != nil {
+		return nil, err
+	}
+	return found, nil
+}
+
+func ListMany[T any](cfg Config, EntityName string) ([]string, error) {
+	found, err := Many[T](cfg, EntityName)
+	if err != nil {
+		return nil, err
+	}
+	return FilterMap(found, nil, func(i int, e *T) string { return fieldStr(e, "Entity") }), nil
+}
+
+func Del[T any](cfg Config, EntityName string) (int, error) {
+
+	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, EntityName)
 	lk.Log("sFilter %v", sFilter)
 
 	// existing db
 	//
 	mh.UseDbCol(cfg.Db, cfg.ColExisting)
-	nExisting, _, err := mh.DeleteOne[T](strings.NewReader(sFilter))
+	nExisting, _, err := mh.DeleteOne[T](strings.NewReader(sFilter)) // MUST re-create reader
 	if err != nil {
 		return 0, err
 	}
@@ -75,19 +81,20 @@ func Del[T any](cfg Config, entityName string) (int, error) {
 		return 0, err
 	}
 
-	// inbound db, html ( need to implement a new rFilter )
+	// inbound db, html (may change in future)
 	//
-	// mh.UseDbCol(cfg.Db, cfg.ColHtml)
+	mh.UseDbCol(cfg.Db, cfg.ColHtml)
+	sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)>?%v<?"}}`, EntityName)
+	nHtml, _, err := mh.DeleteOne[T](strings.NewReader(sFilter)) // MUST re-create reader
+	if err != nil {
+		return 0, err
+	}
 
-	///////////////////////////////////////
-
-	lk.WarnOnErrWhen(nText > nExisting, "%v", fmt.Errorf("nExisting must NOT less than nText"))
-
-	return nText, nil
+	return Max(nExisting, nText, nHtml), nil
 }
 
 func Clr[T any](cfg Config) (int, error) {
-	names, err := List[T](cfg)
+	names, err := ListMany[T](cfg, "")
 	if err != nil {
 		return 0, err
 	}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	mh "github.com/digisan/db-helper/mongo"
@@ -139,16 +140,18 @@ func Upsert(c echo.Context) error {
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   itemType path string true "item type, only can be 'entity' or 'collection'"
+// @Param   itemType path  string true  "item type, only can be 'entity' or 'collection'"
+// @Param   name     query string false "entity/collection 'Entity' name for query. if empty, get all"
 // @Success 200 "OK - get successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/all/{itemType} [get]
-func All(c echo.Context) error {
+// @Router /api/dictionary/items/{itemType} [get]
+func Items(c echo.Context) error {
 
 	lk.Log("Enter: Get All")
 
 	var (
-		itemType = c.Param("itemType") // entity or collection
+		itemType = c.Param("itemType")  // entity or collection
+		name     = c.QueryParam("name") // entity or collection's "Entity" value
 	)
 
 	cfg, ok := db.CfgGrp[itemType]
@@ -162,9 +165,9 @@ func All(c echo.Context) error {
 	)
 	switch itemType {
 	case "entity":
-		result, err = db.All[EntityType](cfg)
+		result, err = db.Many[EntityType](cfg, name)
 	case "collection":
-		result, err = db.All[CollectionType](cfg)
+		result, err = db.Many[CollectionType](cfg, name)
 	}
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -178,7 +181,8 @@ func All(c echo.Context) error {
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   itemType path string true "item type, only can be 'entity' or 'collection'"
+// @Param   itemType path  string true  "item type, only can be 'entity' or 'collection'"
+// @Param   name     query string false "entity/collection 'Entity' name for query. if empty, get all"
 // @Success 200 "OK - list successfully"
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/list/{itemType} [get]
@@ -187,7 +191,8 @@ func List(c echo.Context) error {
 	lk.Log("Enter: Get List")
 
 	var (
-		itemType = c.Param("itemType") // entity or collection
+		itemType = c.Param("itemType")  // entity or collection
+		name     = c.QueryParam("name") // entity or collection's "Entity" value
 	)
 
 	cfg, ok := db.CfgGrp[itemType]
@@ -201,9 +206,9 @@ func List(c echo.Context) error {
 	)
 	switch itemType {
 	case "entity":
-		names, err = db.List[EntityType](cfg)
+		names, err = db.ListMany[EntityType](cfg, name)
 	case "collection":
-		names, err = db.List[CollectionType](cfg)
+		names, err = db.ListMany[CollectionType](cfg, name)
 	}
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -217,8 +222,10 @@ func List(c echo.Context) error {
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   name query string true "Entity name"
+// @Param   name  query string true "Entity name"
+// @Param   fuzzy query bool false "regex applies?" false
 // @Success 200 "OK - got successfully"
+// @Failure 400 "Fail - invalid parameters"
 // @Failure 404 "Fail - not found"
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/one [get]
@@ -227,8 +234,19 @@ func One(c echo.Context) error {
 	lk.Log("Enter: Get One")
 
 	var (
-		name = c.QueryParam("name")
+		name     = c.QueryParam("name")
+		fuzzyStr = c.QueryParam("fuzzy")
+		fuzzy    = false
+		err      error
 	)
+
+	if len(fuzzyStr) > 0 {
+		fuzzy, err = strconv.ParseBool(fuzzyStr)
+		if err != nil {
+			return c.String(http.StatusBadRequest, "'fuzzy' must be bool type, @"+err.Error())
+		}
+	}
+
 	for itemType, cfg := range db.CfgGrp {
 		var (
 			result any
@@ -236,9 +254,9 @@ func One(c echo.Context) error {
 		)
 		switch itemType {
 		case "entity":
-			result, err = db.One[EntityType](cfg, name)
+			result, err = db.One[EntityType](cfg, name, fuzzy)
 		case "collection":
-			result, err = db.One[CollectionType](cfg, name)
+			result, err = db.One[CollectionType](cfg, name, fuzzy)
 		}
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
@@ -316,14 +334,12 @@ func Clear(c echo.Context) error {
 		n   int
 		err error
 	)
-
 	switch itemType {
 	case "entity":
 		n, err = db.Clr[EntityType](cfg)
 	case "collection":
 		n, err = db.Clr[CollectionType](cfg)
 	}
-
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}

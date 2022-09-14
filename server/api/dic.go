@@ -11,9 +11,9 @@ import (
 func Handler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
-		"/all/:itemType":  dic.All,
-		"/list/:itemType": dic.List,
-		"/one":            dic.One,
+		"/items/:itemType": dic.Items,
+		"/list/:itemType":  dic.List,
+		"/one":             dic.One,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
 		"/upsert": dic.Upsert,

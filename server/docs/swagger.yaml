@@ -10,26 +10,6 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
-  /api/dictionary/all/{itemType}:
-    get:
-      consumes:
-      - application/json
-      parameters:
-      - description: item type, only can be 'entity' or 'collection'
-        in: path
-        name: itemType
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK - get successfully
-        "500":
-          description: Fail - internal error
-      summary: get all entities' or collections' full content
-      tags:
-      - Dictionary
   /api/dictionary/clear/{itemType}:
     delete:
       consumes:
@@ -50,6 +30,30 @@ paths:
       summary: delete all entities or collections (dangerous)
       tags:
       - Dictionary
+  /api/dictionary/items/{itemType}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: item type, only can be 'entity' or 'collection'
+        in: path
+        name: itemType
+        required: true
+        type: string
+      - description: entity/collection 'Entity' name for query. if empty, get all
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - get successfully
+        "500":
+          description: Fail - internal error
+      summary: get all entities' or collections' full content
+      tags:
+      - Dictionary
   /api/dictionary/list/{itemType}:
     get:
       consumes:
@@ -59,6 +63,10 @@ paths:
         in: path
         name: itemType
         required: true
+        type: string
+      - description: entity/collection 'Entity' name for query. if empty, get all
+        in: query
+        name: name
         type: string
       produces:
       - application/json
@@ -99,11 +107,17 @@ paths:
         name: name
         required: true
         type: string
+      - description: regex applies?
+        in: query
+        name: fuzzy
+        type: boolean
       produces:
       - application/json
       responses:
         "200":
           description: OK - got successfully
+        "400":
+          description: Fail - invalid parameters
         "404":
           description: Fail - not found
         "500":

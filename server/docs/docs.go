@@ -22,37 +22,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/dictionary/all/{itemType}": {
-            "get": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Dictionary"
-                ],
-                "summary": "get all entities' or collections' full content",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK - get successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
         "/api/dictionary/clear/{itemType}": {
             "delete": {
                 "consumes": [
@@ -84,6 +53,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/dictionary/items/{itemType}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "get all entities' or collections' full content",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "item type, only can be 'entity' or 'collection'",
+                        "name": "itemType",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "entity/collection 'Entity' name for query. if empty, get all",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - get successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/list/{itemType}": {
             "get": {
                 "consumes": [
@@ -103,6 +109,12 @@ const docTemplate = `{
                         "name": "itemType",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "entity/collection 'Entity' name for query. if empty, get all",
+                        "name": "name",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -134,11 +146,20 @@ const docTemplate = `{
                         "name": "name",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "regex applies?",
+                        "name": "fuzzy",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK - got successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters"
                     },
                     "404": {
                         "description": "Fail - not found"
