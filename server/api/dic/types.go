@@ -1,10 +1,5 @@
 package dic
 
-import (
-	"fmt"
-	"strings"
-)
-
 type EntityType struct {
 	Entity     string
 	OtherNames []string
@@ -46,11 +41,11 @@ type EntityType struct {
 	}
 }
 
-func (e EntityType) String() string {
-	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintln("Entity:", e.Entity))
-	return sb.String()
-}
+// func (e EntityType) String() string {
+// 	sb := strings.Builder{}
+// 	sb.WriteString(fmt.Sprintln("Entity:", e.Entity))
+// 	return sb.String()
+// }
 
 type CollectionType struct {
 	Entity     string
@@ -62,8 +57,8 @@ type CollectionType struct {
 	}
 }
 
-func (c CollectionType) String() string {
-	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintln("Entity:", c.Entity))
-	return sb.String()
-}
+// func (c CollectionType) String() string {
+// 	sb := strings.Builder{}
+// 	sb.WriteString(fmt.Sprintln("Entity:", c.Entity))
+// 	return sb.String()
+// }

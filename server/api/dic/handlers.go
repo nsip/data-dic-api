@@ -249,7 +249,7 @@ func One(c echo.Context) error {
 
 	for itemType, cfg := range db.CfgGrp {
 		var (
-			result any
+			result any = nil
 			err    error
 		)
 		switch itemType {
@@ -261,11 +261,13 @@ func One(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if result == nil {
-			continue
+		if !tc.IsNil(result) {
+			return c.JSON(http.StatusOK, result)
 		}
-		return c.JSON(http.StatusOK, result)
 	}
+
+	lk.Warn("Not Found: [%v]", name)
+
 	return c.String(http.StatusNotFound, fmt.Sprintf(`[%v] is not existing`, name))
 }
 

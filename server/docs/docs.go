@@ -253,7 +253,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "National Education Data Dictionary API",
-	Description:      "This is national education data dictionary backend-api server. Updated@ 2022-09-03T21:10:00+10:00",
+	Description:      "This is national education data dictionary backend-api server. Updated@ 2022-09-15T09:29:03+10:00",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

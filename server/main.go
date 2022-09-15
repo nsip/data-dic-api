@@ -28,7 +28,7 @@ func init() {
 
 // @title National Education Data Dictionary API
 // @version 1.0
-// @description This is national education data dictionary backend-api server. Updated@ 2022-09-03T21:10:00+10:00
+// @description This is national education data dictionary backend-api server. Updated@ 2022-09-15T09:29:03+10:00
 // @termsOfService
 // @contact.name API Support
 // @contact.url
