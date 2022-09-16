@@ -19,9 +19,9 @@ type Config struct {
 }
 
 func (cfg Config) String() string {
-	dbstr := fmt.Sprintf("Entity: @database: [%s]; @text collection: [%s]; @html collection: [%s]", cfg.Db, cfg.ColText, cfg.ColHtml)
-	dirstr := fmt.Sprintf("Entity: @text directory: [%s]; @html directory: [%s]", cfg.DirText, cfg.DirHtml)
-	return dbstr + "\n" + dirstr
+	db := fmt.Sprintf("Entity: @database: [%s]; @collection(text): [%s]; @collection(html): [%s]", cfg.Db, cfg.ColText, cfg.ColHtml)
+	dir := fmt.Sprintf("Entity: @directory(text): [%s]; @directory(html): [%s]", cfg.DirText, cfg.DirHtml)
+	return db + lk.LF + dir
 }
 
 const (

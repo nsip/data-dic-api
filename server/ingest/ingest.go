@@ -70,8 +70,6 @@ func ingestAll() error {
 		return err
 	}
 
-	//////////////////////////////
-
 	// ingest Collections
 	if err := ingestFromDir(dbName, "collections", "./data/out/collections", "Entity", "class-link.json", "collection-entities.json"); err != nil {
 		lk.WarnOnErr("%v", err)

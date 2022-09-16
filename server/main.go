@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/nsip/data-dic-api/server/api"
 	_ "github.com/nsip/data-dic-api/server/docs" // once `swag init`, comment it out
+	in "github.com/nsip/data-dic-api/server/ingest"
 	"github.com/postfinance/single"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
@@ -42,9 +43,18 @@ func init() {
 // @name authorization
 func main() {
 
-	http2Ptr := flag.Bool("http2", false, "http2 mode?")
+	var (
+		http2FlagPtr = flag.Bool("h2", false, "http2 mode?")
+		reIngestPtr  = flag.Bool("ri", false, "re-ingest all existing json files to db at start up?")
+	)
 	flag.Parse()
-	fHttp2 = *http2Ptr
+
+	fHttp2 = *http2FlagPtr
+
+	// re ingest all local existing json files to db
+	if *reIngestPtr {
+		lk.FailOnErr("%v", in.IngestViaCmd())
+	}
 
 	// only one instance
 	const dir = "./tmp-locker"
