@@ -30,6 +30,7 @@ type EntityType struct {
 		Description            string
 		Standard               string
 		Elements               []string
+		BusinessRules          []string
 		DefinitionModification string
 	}
 	Metadata struct {

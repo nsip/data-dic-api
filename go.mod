@@ -11,7 +11,7 @@ require (
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/postfinance/single v0.0.2
 	github.com/swaggo/echo-swagger v1.3.4
-	github.com/swaggo/swag v1.8.5
+	github.com/swaggo/swag v1.8.6
 	github.com/tidwall/gjson v1.14.3
 	github.com/tidwall/sjson v1.2.5
 	go.mongodb.org/mongo-driver v1.10.2
@@ -30,7 +30,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/klauspost/compress v1.15.9 // indirect
+	github.com/klauspost/compress v1.15.10 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
