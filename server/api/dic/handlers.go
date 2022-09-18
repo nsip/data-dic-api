@@ -56,9 +56,9 @@ func Upsert(c echo.Context) error {
 	//
 	inType := ""
 	switch {
-	case json.Unmarshal(data, &EntityType{}) != nil:
+	case json.Unmarshal(data, &EntityType{}) == nil:
 		inType = "entity"
-	case json.Unmarshal(data, &CollectionType{}) != nil:
+	case json.Unmarshal(data, &CollectionType{}) == nil:
 		inType = "collection"
 	default:
 		return c.String(http.StatusBadRequest, "invalid payload, cannot be converted to entity or collection")
