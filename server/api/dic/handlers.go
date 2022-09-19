@@ -374,3 +374,45 @@ func ColEntities(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, rt)
 }
+
+// @Router /api/dictionary/entclasses [get]
+func EntClasses(c echo.Context) error {
+
+	lk.Log("Enter: EntClasses")
+
+	var (
+		name = c.QueryParam("entname")
+	)
+	derived, children, err := db.EntClasses(db.CfgGrp["entity"], name) // only use cfg's dbName, colName is fixed.
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, struct {
+		Derived  []string
+		Children []string
+	}{derived, children})
+}
+
+// @Router /api/dictionary/search [get]
+func FullTextSearch(c echo.Context) error {
+
+	lk.Log("Enter: FullTextSearch")
+
+	var (
+		aim        = c.QueryParam("aim")
+		ignorecase = c.QueryParam("ignorecase")
+	)
+	flagIgnCase, err := strconv.ParseBool(ignorecase)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	entities, collections, err := db.FullTextSearch(db.CfgGrp["entity"], aim, flagIgnCase) // only use cfg's dbName, colName is fixed.
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, struct {
+		Entities    []string
+		Collections []string
+	}{entities, collections})
+}

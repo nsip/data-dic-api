@@ -11,8 +11,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/digisan/db-helper v0.0.13 h1:gXDNLgHJx7N9KxF8dhI9YOxb9OixAem+UjubfVEk6mg=
-github.com/digisan/db-helper v0.0.13/go.mod h1:zir4xbj/kYDy4mcstI9yRlFh+QjKeL7btztcE3wXTfc=
+github.com/digisan/db-helper v0.0.14 h1:qEti1yeiKfroP10rlcjEUKcyUW9KYRLi9bHfLHSLeuE=
+github.com/digisan/db-helper v0.0.14/go.mod h1:zir4xbj/kYDy4mcstI9yRlFh+QjKeL7btztcE3wXTfc=
 github.com/digisan/go-generics v0.2.3 h1:5VXV0kKZMo9Nzx4Rs+/6APHWr/e9uJf3AuZ1FgtlagU=
 github.com/digisan/go-generics v0.2.3/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
 github.com/digisan/gotk v0.1.22 h1:YraAGNNb9jtIT8MO1RcKbgOUuWmWxobNOY5j3GlAxFU=
