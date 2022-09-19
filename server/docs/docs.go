@@ -53,6 +53,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/dictionary/colentities": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "get collection of related entities' name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "collection name",
+                        "name": "colname",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - got collection content successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/items/{itemType}": {
             "get": {
                 "consumes": [

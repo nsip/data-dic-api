@@ -30,6 +30,26 @@ paths:
       summary: delete all entities or collections (dangerous)
       tags:
       - Dictionary
+  /api/dictionary/colentities:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: collection name
+        in: query
+        name: colname
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - got collection content successfully
+        "500":
+          description: Fail - internal error
+      summary: get collection of related entities' name
+      tags:
+      - Dictionary
   /api/dictionary/items/{itemType}:
     get:
       consumes:

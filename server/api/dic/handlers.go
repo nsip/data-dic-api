@@ -348,3 +348,29 @@ func Clear(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, struct{ CountDeleted int }{n})
 }
+
+//////////////////////////////////////////////////////////////////
+
+// @Title get collection of related entities
+// @Summary get collection of related entities' name
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   colname query string true "collection name"
+// @Success 200 "OK - got collection content successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/colentities [get]
+func ColEntities(c echo.Context) error {
+
+	lk.Log("Enter: ColEntities")
+
+	var (
+		name = c.QueryParam("colname")
+	)
+	rt, err := db.ColEntities(db.CfgGrp["collection"], name) // only use cfg's dbName, colName is fixed.
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, rt)
+}

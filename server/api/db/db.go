@@ -108,3 +108,22 @@ func Clr[T any](cfg Config) (int, error) {
 	}
 	return cnt, nil
 }
+
+/////////////////////////////////////////////////////////////
+
+func ColEntities(cfg Config, ColName string) ([]string, error) {
+	mh.UseDbCol(cfg.Db, "colentities")
+	found, err := mh.FindOne[map[string]any](nil)
+	if err != nil {
+		return nil, err
+	}
+	rtAny, ok := (*found)[ColName]
+	if !ok {
+		return []string{}, nil
+	}
+	rtStr, err := mh.CvtA[string](rtAny)
+	if err != nil {
+		return nil, err
+	}
+	return rtStr, nil
+}
