@@ -172,9 +172,10 @@ func FullTextSearch(cfg Config, aim string, insensitive bool) ([]string, []strin
 
 	prefix := IF(insensitive, "(?i)", "")
 	sep := `[\s\\/-:]+`
-	r1 := regexp.MustCompile(fmt.Sprintf(`%s^%s%s`, prefix, aim, sep))
-	r2 := regexp.MustCompile(fmt.Sprintf(`%s%s%s%s`, prefix, sep, aim, sep))
-	r3 := regexp.MustCompile(fmt.Sprintf(`%s%s%s$`, prefix, sep, aim))
+	r0 := regexp.MustCompile(fmt.Sprintf(`%s^%s$`, prefix, aim))             // whole
+	r1 := regexp.MustCompile(fmt.Sprintf(`%s^%s%s`, prefix, aim, sep))       // start
+	r2 := regexp.MustCompile(fmt.Sprintf(`%s%s%s%s`, prefix, sep, aim, sep)) // middle
+	r3 := regexp.MustCompile(fmt.Sprintf(`%s%s%s$`, prefix, sep, aim))       // end
 
 	for _, one := range all {
 		itemName := (*one)["Entity"].(string)
@@ -186,8 +187,8 @@ func FullTextSearch(cfg Config, aim string, insensitive bool) ([]string, []strin
 		}
 
 		for _, val := range *one {
-			valstr := fmt.Sprint(val)
-			if r1.MatchString(valstr) || r2.MatchString(valstr) || r3.MatchString(valstr) {
+			valstr := strings.TrimSpace(fmt.Sprint(val))
+			if r0.MatchString(valstr) || r1.MatchString(valstr) || r2.MatchString(valstr) || r3.MatchString(valstr) {
 				if flagCol {
 					collections = append(collections, itemName)
 				} else {
