@@ -47,7 +47,27 @@ paths:
           description: OK - got collection content successfully
         "500":
           description: Fail - internal error
-      summary: get collection of related entities' name
+      summary: get related entities' name of a collection
+      tags:
+      - Dictionary
+  /api/dictionary/entclasses:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: entity name
+        in: query
+        name: entname
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - got entity class info successfully
+        "500":
+          description: Fail - internal error
+      summary: get class info (derived path & children) of an entity
       tags:
       - Dictionary
   /api/dictionary/items/{itemType}:
@@ -143,6 +163,32 @@ paths:
         "500":
           description: Fail - internal error
       summary: get one entity or collection by its 'Entity' name
+      tags:
+      - Dictionary
+  /api/dictionary/search:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: search content from whole dictionary
+        in: query
+        name: aim
+        type: string
+      - description: case insensitive ?
+        in: query
+        name: ignorecase
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - got list of found item's name successfully
+        "400":
+          description: Fail - invalid parameters
+        "500":
+          description: Fail - internal error
+      summary: get list of entity's & collection's name by searching. If not given,
+        return all
       tags:
       - Dictionary
   /api/dictionary/upsert:

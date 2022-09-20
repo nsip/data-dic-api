@@ -222,8 +222,8 @@ func List(c echo.Context) error {
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   name  query string true "Entity name"
-// @Param   fuzzy query bool false "regex applies?" false
+// @Param   name  query string  true "Entity name"
+// @Param   fuzzy query boolean false "regex applies?" false
 // @Success 200 "OK - got successfully"
 // @Failure 400 "Fail - invalid parameters"
 // @Failure 404 "Fail - not found"
@@ -351,8 +351,8 @@ func Clear(c echo.Context) error {
 
 //////////////////////////////////////////////////////////////////
 
-// @Title get collection of related entities
-// @Summary get collection of related entities' name
+// @Title get related entities of a collection
+// @Summary get related entities' name of a collection
 // @Description
 // @Tags    Dictionary
 // @Accept  json
@@ -375,6 +375,15 @@ func ColEntities(c echo.Context) error {
 	return c.JSON(http.StatusOK, rt)
 }
 
+// @Title get class info of an entity
+// @Summary get class info (derived path & children) of an entity
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   entname query string true "entity name"
+// @Success 200 "OK - got entity class info successfully"
+// @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/entclasses [get]
 func EntClasses(c echo.Context) error {
 
@@ -388,11 +397,22 @@ func EntClasses(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, struct {
-		Derived  []string
-		Children []string
+		DerivedPath []string
+		Children    []string
 	}{derived, children})
 }
 
+// @Title get list of item's name by searching
+// @Summary get list of entity's & collection's name by searching. If not given, return all
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   aim        query string  false "search content from whole dictionary"
+// @Param   ignorecase query boolean false "case insensitive ?"
+// @Success 200 "OK - got list of found item's name successfully"
+// @Failure 400 "Fail - invalid parameters"
+// @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/search [get]
 func FullTextSearch(c echo.Context) error {
 
@@ -402,11 +422,28 @@ func FullTextSearch(c echo.Context) error {
 		aim        = c.QueryParam("aim")
 		ignorecase = c.QueryParam("ignorecase")
 	)
+
+	// if aim is empty, return list of all items
+	if len(aim) == 0 {
+		entities, err := db.ListMany[EntityType](db.CfgGrp["entity"], "")
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		collections, err := db.ListMany[CollectionType](db.CfgGrp["collection"], "")
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		return c.JSON(http.StatusOK, struct {
+			Entities    []string
+			Collections []string
+		}{entities, collections})
+	}
+
+	// aim is not empty, do real full text search
 	flagIgnCase, err := strconv.ParseBool(ignorecase)
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-
 	entities, collections, err := db.FullTextSearch(db.CfgGrp["entity"], aim, flagIgnCase) // only use cfg's dbName, colName is fixed.
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())

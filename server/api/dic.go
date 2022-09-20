@@ -15,6 +15,8 @@ func Handler(r *echo.Group) {
 		"/list/:itemType":  dic.List,
 		"/one":             dic.One,
 		"/colentities":     dic.ColEntities,
+		"/entclasses":      dic.EntClasses,
+		"/search":          dic.FullTextSearch,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
 		"/upsert": dic.Upsert,

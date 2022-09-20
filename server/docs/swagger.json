@@ -56,7 +56,7 @@
                 "tags": [
                     "Dictionary"
                 ],
-                "summary": "get collection of related entities' name",
+                "summary": "get related entities' name of a collection",
                 "parameters": [
                     {
                         "type": "string",
@@ -69,6 +69,37 @@
                 "responses": {
                     "200": {
                         "description": "OK - got collection content successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/entclasses": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "get class info (derived path \u0026 children) of an entity",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "entity name",
+                        "name": "entname",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - got entity class info successfully"
                     },
                     "500": {
                         "description": "Fail - internal error"
@@ -215,6 +246,45 @@
                 "responses": {
                     "200": {
                         "description": "OK - deleted successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/search": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "get list of entity's \u0026 collection's name by searching. If not given, return all",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search content from whole dictionary",
+                        "name": "aim",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "case insensitive ?",
+                        "name": "ignorecase",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - got list of found item's name successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters"
                     },
                     "500": {
                         "description": "Fail - internal error"

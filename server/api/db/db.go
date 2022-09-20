@@ -155,9 +155,15 @@ func EntClasses(cfg Config, EntName string) ([]string, []string, error) {
 	return strings.Split(c.Branch, "--"), c.Children, nil
 }
 
-func FullTextSearch(cfg Config, aim string, insensitive bool) (entities []string, collections []string, err error) {
+func FullTextSearch(cfg Config, aim string, insensitive bool) ([]string, []string, error) {
 
 	mh.UseDbCol(cfg.Db, "pathval") // fixed collection name
+
+	var (
+		entities    = []string{}
+		collections = []string{}
+		err         error
+	)
 
 	all, err := mh.Find[map[string]any](nil) // need to iterate all
 	if err != nil {
@@ -191,5 +197,5 @@ func FullTextSearch(cfg Config, aim string, insensitive bool) (entities []string
 			}
 		}
 	}
-	return
+	return entities, collections, err
 }
