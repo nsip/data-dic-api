@@ -94,6 +94,28 @@ paths:
       summary: get all entities' or collections' full content
       tags:
       - Dictionary
+  /api/dictionary/kind:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Entity name for checking kind
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - got kind ('entity' or 'collection') successfully
+        "404":
+          description: Fail - neither 'entity' nor 'collection'
+        "500":
+          description: Fail - internal error
+      summary: check item's kind ('entity' or 'collection') by its name
+      tags:
+      - Dictionary
   /api/dictionary/list/{itemType}:
     get:
       consumes:

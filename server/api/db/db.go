@@ -142,7 +142,7 @@ func EntClasses(cfg Config, EntName string) ([]string, []string, error) {
 	}
 	rt, ok := (*whole)[EntName] // primitive.M
 	if !ok {
-		return []string{}, []string{}, nil
+		return []string{EntName}, []string{}, nil
 	}
 
 	c, err := mh.CvtM[struct {

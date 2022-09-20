@@ -22,6 +22,10 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+var (
+	mListCache = make(map[string][]string)
+)
+
 // @Title insert or update one dictionary item
 // @Summary insert or update one entity or collection data by json payload
 // @Description
@@ -213,6 +217,10 @@ func List(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+
+	// cache list
+	mListCache[itemType] = names
+
 	return c.JSON(http.StatusOK, names)
 }
 
@@ -349,6 +357,46 @@ func Clear(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct{ CountDeleted int }{n})
 }
 
+// @Title check item's kind by its name
+// @Summary check item's kind ('entity' or 'collection') by its name
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   name query string true "Entity name for checking kind"
+// @Success 200 "OK - got kind ('entity' or 'collection') successfully"
+// @Failure 404 "Fail - neither 'entity' nor 'collection'"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/kind [get]
+func CheckItemKind(c echo.Context) error {
+
+	lk.Log("Enter: CheckItemKind")
+
+	var (
+		name = c.QueryParam("name")
+	)
+
+	if len(mListCache) == 0 {
+		return c.String(http.StatusInternalServerError, "list cache hasn't been loaded")
+	}
+	for kind, list := range mListCache {
+		if len(list) == 0 {
+			return c.String(http.StatusInternalServerError, fmt.Sprintf("[%s] list hasn't been loaded", kind))
+		}
+	}
+
+	switch {
+	case strs.IsIn(true, true, name, mListCache["entity"]...):
+		return c.JSON(http.StatusOK, "entity")
+
+	case strs.IsIn(true, true, name, mListCache["collection"]...):
+		return c.JSON(http.StatusOK, "collection")
+
+	default:
+		return c.String(http.StatusNotFound, "unknown")
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 
 // @Title get related entities of a collection
@@ -425,18 +473,10 @@ func FullTextSearch(c echo.Context) error {
 
 	// if aim is empty, return list of all items
 	if len(aim) == 0 {
-		entities, err := db.ListMany[EntityType](db.CfgGrp["entity"], "")
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
-		collections, err := db.ListMany[CollectionType](db.CfgGrp["collection"], "")
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
 		return c.JSON(http.StatusOK, struct {
 			Entities    []string
 			Collections []string
-		}{entities, collections})
+		}{mListCache["entity"], mListCache["collection"]})
 	}
 
 	// aim is not empty, do real full text search

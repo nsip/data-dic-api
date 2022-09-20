@@ -144,6 +144,40 @@
                 }
             }
         },
+        "/api/dictionary/kind": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "check item's kind ('entity' or 'collection') by its name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity name for checking kind",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - got kind ('entity' or 'collection') successfully"
+                    },
+                    "404": {
+                        "description": "Fail - neither 'entity' nor 'collection'"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/list/{itemType}": {
             "get": {
                 "consumes": [
