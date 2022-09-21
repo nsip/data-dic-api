@@ -18,7 +18,7 @@ const (
 	dbName = "dictionaryTest"
 )
 
-func IngestViaCmd() error {
+func IngestViaCmd(clrdb bool) error {
 
 	type output struct {
 		out []byte
@@ -42,7 +42,12 @@ func IngestViaCmd() error {
 		if x.err != nil {
 			return x.err
 		}
-		if err := ingestAll(); err != nil {
+		if clrdb {
+			if err := clearDb(dbName); err != nil {
+				return err
+			}
+		}
+		if err := ingestAll(dbName); err != nil {
 			return err
 		}
 	}
@@ -50,40 +55,59 @@ func IngestViaCmd() error {
 	return nil
 }
 
-func ingestAll() error {
+func clearDb(db string) error {
+	if err := mh.DropCol(db, "pathval"); err != nil {
+		return err
+	}
+	if err := mh.DropCol(db, "class"); err != nil {
+		return err
+	}
+	if err := mh.DropCol(db, "colentities"); err != nil {
+		return err
+	}
+	if err := mh.DropCol(db, "collections"); err != nil {
+		return err
+	}
+	if err := mh.DropCol(db, "entities"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func ingestAll(db string) error {
 
 	// ingest existing entities json files
-	if err := ingestFromDir(dbName, "entities", "./data/out", "Entity", "class-link.json", "collection-entities.json"); err != nil {
+	if err := ingestFromDir(db, "entities", "./data/out", "Entity", "class-link.json", "collection-entities.json"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Entity ClassLinkage
-	if err := ingestFromFile(dbName, "class", "./data/out/class-link.json", "RefName"); err != nil {
+	if err := ingestFromFile(db, "class", "./data/out/class-link.json", "RefName"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Entities PathVal
-	if err := ingestFromDir(dbName, "pathval", "./data/out/path_val", "Entity"); err != nil {
+	if err := ingestFromDir(db, "pathval", "./data/out/path_val", "Entity"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Collections
-	if err := ingestFromDir(dbName, "collections", "./data/out/collections", "Entity", "class-link.json", "collection-entities.json"); err != nil {
+	if err := ingestFromDir(db, "collections", "./data/out/collections", "Entity", "class-link.json", "collection-entities.json"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Collections PathVal
-	if err := ingestFromDir(dbName, "pathval", "./data/out/collections/path_val", "Entity"); err != nil {
+	if err := ingestFromDir(db, "pathval", "./data/out/collections/path_val", "Entity"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Collection-Entities
-	if err := ingestFromFile(dbName, "colentities", "./data/out/collection-entities.json", "RefName"); err != nil {
+	if err := ingestFromFile(db, "colentities", "./data/out/collection-entities.json", "RefName"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}

@@ -129,7 +129,7 @@ func Upsert(c echo.Context) error {
 		}
 
 		// Re ingest all, then update db(entities/collections)
-		if err := in.IngestViaCmd(); err != nil {
+		if err := in.IngestViaCmd(false); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 	}

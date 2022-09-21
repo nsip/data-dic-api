@@ -53,7 +53,7 @@ func main() {
 
 	// re ingest all local existing json files to db
 	if *reIngestPtr {
-		lk.FailOnErr("%v", in.IngestViaCmd())
+		lk.FailOnErr("%v", in.IngestViaCmd(true))
 	}
 
 	// only one instance
