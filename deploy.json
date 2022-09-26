@@ -1,14 +1,14 @@
 {
     "IpRepl": [
         {
-            "Enable": false,
+            "Enable": true,
             "ToPub": true,
             "ToLoc": false,
-            "ToIP": "127.0.0.5",
+            "ToIP": "127.0.0.1",
             "_ToIP": "change current 'localhost' to which IP?",
             "OnlyFirst": true,
             "Files": [
-                "./test.html"
+                "./server/main.go"
             ]
         }
     ],

@@ -118,7 +118,7 @@ func echoHost(done chan<- string) {
 		// waiting for shutdown
 		waitShutdown(e)
 
-		// host swagger http://localhost:1323/swagger/index.html
+		// host /swagger/index.html
 		e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 		// groups without middleware

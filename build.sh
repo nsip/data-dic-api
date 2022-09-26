@@ -11,6 +11,7 @@ cd ./server
 
 GOARCH=amd64
 LDFLAGS="-s -w"
+
 TM=`date +%F@%T@%Z`
 OUT=server\($TM\)
 
