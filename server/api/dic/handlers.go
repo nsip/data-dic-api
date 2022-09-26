@@ -36,7 +36,8 @@ var (
 // @Success 200 "OK - insert or update successfully"
 // @Failure 400 "Fail - invalid parameters or request body"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/upsert [post]
+// @Router /api/dictionary/auth/upsert [post]
+// @Security ApiKeyAuth
 func Upsert(c echo.Context) error {
 
 	lk.Log("Enter: Post Upsert")
@@ -136,8 +137,6 @@ func Upsert(c echo.Context) error {
 	return c.JSON(http.StatusOK, IdOrCnt)
 }
 
-/////////////////////////////////////// FOR NEXT FRONTEND VERSION ///////////////////////////////////////
-
 // @Title get all items
 // @Summary get all entities' or collections' full content
 // @Description
@@ -148,7 +147,7 @@ func Upsert(c echo.Context) error {
 // @Param   name     query string false "entity/collection 'Entity' name for query. if empty, get all"
 // @Success 200 "OK - get successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/items/{itemType} [get]
+// @Router /api/dictionary/pub/items/{itemType} [get]
 func Items(c echo.Context) error {
 
 	lk.Log("Enter: Get All")
@@ -189,7 +188,7 @@ func Items(c echo.Context) error {
 // @Param   name     query string false "entity/collection 'Entity' name for query. if empty, get all"
 // @Success 200 "OK - list successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/list/{itemType} [get]
+// @Router /api/dictionary/pub/list/{itemType} [get]
 func List(c echo.Context) error {
 
 	lk.Log("Enter: Get List")
@@ -236,7 +235,7 @@ func List(c echo.Context) error {
 // @Failure 400 "Fail - invalid parameters"
 // @Failure 404 "Fail - not found"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/one [get]
+// @Router /api/dictionary/pub/one [get]
 func One(c echo.Context) error {
 
 	lk.Log("Enter: Get One")
@@ -288,7 +287,8 @@ func One(c echo.Context) error {
 // @Param   name query string true "Entity name for deleting"
 // @Success 200 "OK - deleted successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/one [delete]
+// @Router /api/dictionary/auth/one [delete]
+// @Security ApiKeyAuth
 func Delete(c echo.Context) error {
 
 	lk.Log("Enter: Delete Delete")
@@ -326,7 +326,8 @@ func Delete(c echo.Context) error {
 // @Param   itemType path string true "item type, only can be 'entity' or 'collection'"
 // @Success 200 "OK - cleared successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/clear/{itemType} [delete]
+// @Router /api/dictionary/auth/clear/{itemType} [delete]
+// @Security ApiKeyAuth
 func Clear(c echo.Context) error {
 
 	lk.Log("Enter: Delete Clear")
@@ -367,7 +368,7 @@ func Clear(c echo.Context) error {
 // @Success 200 "OK - got kind ('entity' or 'collection') successfully"
 // @Failure 404 "Fail - neither 'entity' nor 'collection'"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/kind [get]
+// @Router /api/dictionary/pub/kind [get]
 func CheckItemKind(c echo.Context) error {
 
 	lk.Log("Enter: CheckItemKind")
@@ -408,7 +409,7 @@ func CheckItemKind(c echo.Context) error {
 // @Param   colname query string true "collection name"
 // @Success 200 "OK - got collection content successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/colentities [get]
+// @Router /api/dictionary/pub/colentities [get]
 func ColEntities(c echo.Context) error {
 
 	lk.Log("Enter: ColEntities")
@@ -432,7 +433,7 @@ func ColEntities(c echo.Context) error {
 // @Param   entname query string true "entity name"
 // @Success 200 "OK - got entity class info successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/entclasses [get]
+// @Router /api/dictionary/pub/entclasses [get]
 func EntClasses(c echo.Context) error {
 
 	lk.Log("Enter: EntClasses")
@@ -461,7 +462,7 @@ func EntClasses(c echo.Context) error {
 // @Success 200 "OK - got list of found item's name successfully"
 // @Failure 400 "Fail - invalid parameters"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/search [get]
+// @Router /api/dictionary/pub/search [get]
 func FullTextSearch(c echo.Context) error {
 
 	lk.Log("Enter: FullTextSearch")

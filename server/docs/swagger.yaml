@@ -10,7 +10,7 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
-  /api/dictionary/clear/{itemType}:
+  /api/dictionary/auth/clear/{itemType}:
     delete:
       consumes:
       - application/json
@@ -27,10 +27,60 @@ paths:
           description: OK - cleared successfully
         "500":
           description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
       summary: delete all entities or collections (dangerous)
       tags:
       - Dictionary
-  /api/dictionary/colentities:
+  /api/dictionary/auth/one:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Entity name for deleting
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - deleted successfully
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: delete one entity or collection by its 'Entity' name
+      tags:
+      - Dictionary
+  /api/dictionary/auth/upsert:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: entity or collection json data for uploading
+        format: binary
+        in: body
+        name: entity
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - insert or update successfully
+        "400":
+          description: Fail - invalid parameters or request body
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: insert or update one entity or collection data by json payload
+      tags:
+      - Dictionary
+  /api/dictionary/pub/colentities:
     get:
       consumes:
       - application/json
@@ -50,7 +100,7 @@ paths:
       summary: get related entities' name of a collection
       tags:
       - Dictionary
-  /api/dictionary/entclasses:
+  /api/dictionary/pub/entclasses:
     get:
       consumes:
       - application/json
@@ -70,7 +120,7 @@ paths:
       summary: get class info (derived path & children) of an entity
       tags:
       - Dictionary
-  /api/dictionary/items/{itemType}:
+  /api/dictionary/pub/items/{itemType}:
     get:
       consumes:
       - application/json
@@ -94,7 +144,7 @@ paths:
       summary: get all entities' or collections' full content
       tags:
       - Dictionary
-  /api/dictionary/kind:
+  /api/dictionary/pub/kind:
     get:
       consumes:
       - application/json
@@ -116,7 +166,7 @@ paths:
       summary: check item's kind ('entity' or 'collection') by its name
       tags:
       - Dictionary
-  /api/dictionary/list/{itemType}:
+  /api/dictionary/pub/list/{itemType}:
     get:
       consumes:
       - application/json
@@ -140,26 +190,7 @@ paths:
       summary: list all entities' or collections' name
       tags:
       - Dictionary
-  /api/dictionary/one:
-    delete:
-      consumes:
-      - application/json
-      parameters:
-      - description: Entity name for deleting
-        in: query
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK - deleted successfully
-        "500":
-          description: Fail - internal error
-      summary: delete one entity or collection by its 'Entity' name
-      tags:
-      - Dictionary
+  /api/dictionary/pub/one:
     get:
       consumes:
       - application/json
@@ -187,7 +218,7 @@ paths:
       summary: get one entity or collection by its 'Entity' name
       tags:
       - Dictionary
-  /api/dictionary/search:
+  /api/dictionary/pub/search:
     get:
       consumes:
       - application/json
@@ -213,30 +244,83 @@ paths:
         return all
       tags:
       - Dictionary
-  /api/dictionary/upsert:
-    post:
+  /api/sign-out/:
+    get:
       consumes:
       - application/json
-      parameters:
-      - description: entity or collection json data for uploading
-        format: binary
-        in: body
-        name: entity
-        required: true
-        schema:
-          type: string
       produces:
       - application/json
       responses:
         "200":
-          description: OK - insert or update successfully
-        "400":
-          description: Fail - invalid parameters or request body
+          description: OK - sign-out successfully
         "500":
           description: Fail - internal error
-      summary: insert or update one entity or collection data by json payload
+      security:
+      - ApiKeyAuth: []
+      summary: sign out action.
       tags:
-      - Dictionary
+      - Sign
+  /api/sign/in:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: user name or email
+        in: formData
+        name: uname
+        required: true
+        type: string
+      - description: password
+        format: password
+        in: formData
+        name: pwd
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - sign-in successfully
+        "400":
+          description: Fail - incorrect password
+        "500":
+          description: Fail - internal error
+      summary: sign in action. if ok, got token
+      tags:
+      - Sign
+  /api/sign/new:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: unique user name
+        in: formData
+        name: uname
+        required: true
+        type: string
+      - description: user's email
+        format: email
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: user's password
+        in: formData
+        name: pwd
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - then waiting for verification code
+        "400":
+          description: Fail - invalid registry fields
+        "500":
+          description: Fail - internal error
+      summary: sign up action, send user's basic info for registry
+      tags:
+      - Sign
 securityDefinitions:
   ApiKeyAuth:
     in: header

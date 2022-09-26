@@ -22,8 +22,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/dictionary/clear/{itemType}": {
+        "/api/dictionary/auth/clear/{itemType}": {
             "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -53,7 +58,85 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/colentities": {
+        "/api/dictionary/auth/one": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "delete one entity or collection by its 'Entity' name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity name for deleting",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - deleted successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/auth/upsert": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "insert or update one entity or collection data by json payload",
+                "parameters": [
+                    {
+                        "format": "binary",
+                        "description": "entity or collection json data for uploading",
+                        "name": "entity",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - insert or update successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters or request body"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/pub/colentities": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -84,7 +167,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/entclasses": {
+        "/api/dictionary/pub/entclasses": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -115,7 +198,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/items/{itemType}": {
+        "/api/dictionary/pub/items/{itemType}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -152,7 +235,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/kind": {
+        "/api/dictionary/pub/kind": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -186,7 +269,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/list/{itemType}": {
+        "/api/dictionary/pub/list/{itemType}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -223,7 +306,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/one": {
+        "/api/dictionary/pub/one": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -264,38 +347,9 @@ const docTemplate = `{
                         "description": "Fail - internal error"
                     }
                 }
-            },
-            "delete": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Dictionary"
-                ],
-                "summary": "delete one entity or collection by its 'Entity' name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Entity name for deleting",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK - deleted successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
             }
         },
-        "/api/dictionary/search": {
+        "/api/dictionary/pub/search": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -334,8 +388,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/upsert": {
-            "post": {
+        "/api/sign-out/": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -343,27 +402,103 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Dictionary"
+                    "Sign"
                 ],
-                "summary": "insert or update one entity or collection data by json payload",
+                "summary": "sign out action.",
+                "responses": {
+                    "200": {
+                        "description": "OK - sign-out successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/sign/in": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "sign in action. if ok, got token",
                 "parameters": [
                     {
-                        "format": "binary",
-                        "description": "entity or collection json data for uploading",
-                        "name": "entity",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
+                        "type": "string",
+                        "description": "user name or email",
+                        "name": "uname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "password",
+                        "description": "password",
+                        "name": "pwd",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK - insert or update successfully"
+                        "description": "OK - sign-in successfully"
                     },
                     "400": {
-                        "description": "Fail - invalid parameters or request body"
+                        "description": "Fail - incorrect password"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/sign/new": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sign"
+                ],
+                "summary": "sign up action, send user's basic info for registry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "unique user name",
+                        "name": "uname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "user's email",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "user's password",
+                        "name": "pwd",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - then waiting for verification code"
+                    },
+                    "400": {
+                        "description": "Fail - invalid registry fields"
                     },
                     "500": {
                         "description": "Fail - internal error"

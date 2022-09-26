@@ -10,6 +10,8 @@ import (
 
 	gio "github.com/digisan/gotk/io"
 	lk "github.com/digisan/logkit"
+	u "github.com/digisan/user-mgr/user"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/nsip/data-dic-api/server/api"
@@ -87,7 +89,6 @@ func waitShutdown(e *echo.Echo) {
 
 		// other clean-up before closing echo
 		{
-
 		}
 
 		// shutdown echo
@@ -122,23 +123,26 @@ func echoHost(done chan<- string) {
 
 		// groups without middleware
 		{
-			// api.SignHandler(e.Group("/api/xxx"))
+			api.SignHandler(e.Group("/api/sign"))
+			api.DicPubHandler(e.Group("/api/dictionary/pub"))
 		}
 
 		// other groups with middleware
 		groups := []string{
-			"/api/dictionary",
+			"/api/dictionary/auth",
+			"/api/sign-out",
 		}
 		handlers := []func(*echo.Group){
-			api.Handler,
+			api.DicAuthHandler,
+			api.SignoutHandler,
 		}
 		for i, group := range groups {
 			r := e.Group(group)
-			r.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-				return func(c echo.Context) error {
-					return next(c)
-				}
-			})
+			r.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+				Claims:     &u.UserClaims{},
+				SigningKey: []byte(u.TokenKey()),
+			}))
+			r.Use(ValidateToken)
 			handlers[i](r)
 		}
 
@@ -151,4 +155,17 @@ func echoHost(done chan<- string) {
 		}
 		lk.FailOnErrWhen(err != http.ErrServerClosed, "%v", err)
 	}()
+}
+
+func ValidateToken(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		userTkn := c.Get("user").(*jwt.Token)
+		claims := userTkn.Claims.(*u.UserClaims)
+		if claims.ValidateToken(userTkn.Raw) {
+			return next(c)
+		}
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message": "invalid or expired jwt",
+		})
+	}
 }

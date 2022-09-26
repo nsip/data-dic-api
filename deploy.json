@@ -1,0 +1,24 @@
+{
+    "IpRepl": [
+        {
+            "Enable": false,
+            "ToPub": true,
+            "ToLoc": false,
+            "ToIP": "127.0.0.5",
+            "_ToIP": "change current 'localhost' to which IP?",
+            "OnlyFirst": true,
+            "Files": [
+                "./test.html"
+            ]
+        }
+    ],
+    "SymbolRepl": [
+        {
+            "Enable": true,
+            "OnlyForCmt": true,
+            "Files": [
+                "./server/main.go"
+            ]
+        }
+    ]
+}
