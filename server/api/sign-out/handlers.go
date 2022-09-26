@@ -41,5 +41,5 @@ func SignOut(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.String(http.StatusOK, fmt.Sprintf("[%s] sign-out successfully", uname))
+	return c.JSON(http.StatusOK, fmt.Sprintf("[%s] sign-out successfully", uname))
 }

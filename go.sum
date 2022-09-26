@@ -41,8 +41,8 @@ github.com/digisan/json-tool v0.1.6 h1:P45q40by0/HcjkNAsUlOtz5LywMcSe4JSkjqDjTB8
 github.com/digisan/json-tool v0.1.6/go.mod h1:XDKMbw/UBLB7WwdFyftPcZa9Qv5J2/HZ9sZsloxye5s=
 github.com/digisan/logkit v0.1.3 h1:bbjtcW6fY+SwTgO0Hx2PfCJbLdMQL6NjFNiaaparQko=
 github.com/digisan/logkit v0.1.3/go.mod h1:gu5uNGzmFuFB05dC2MUPbaQYLq7odoI4ClZZ9Kue4Ho=
-github.com/digisan/user-mgr v0.3.7 h1:cka7/w/rpe8jJ4wL96xzHkjYkSAK3YN/BXIUfjPKEvE=
-github.com/digisan/user-mgr v0.3.7/go.mod h1:rN0/N2ERkBkEKF0RXPUyyR4EomaT6IGzVO2IQ7wJUsU=
+github.com/digisan/user-mgr v0.3.8 h1:y8/8XGTVs37+LbxKQ8Qtg/5d1Lp2wS9y7ncpz8aotZg=
+github.com/digisan/user-mgr v0.3.8/go.mod h1:rN0/N2ERkBkEKF0RXPUyyR4EomaT6IGzVO2IQ7wJUsU=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

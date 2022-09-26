@@ -91,7 +91,7 @@ func NewUser(c echo.Context) error {
 	{
 	}
 
-	return c.String(http.StatusOK, "registered successfully")
+	return c.JSON(http.StatusOK, "registered successfully")
 }
 
 // @Title sign in
