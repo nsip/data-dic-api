@@ -1,4 +1,4 @@
-package sign
+package user
 
 import (
 	"context"
@@ -24,7 +24,7 @@ func init() {
 	u.InitDB("./data/db-user")
 
 	// set user validator
-	su.SetValidator(map[string]func(o, v any) u.ValRst{
+	su.SetValidator(map[string]func(o, v any) u.ValRst{		
 		vf.AvatarType: func(o, v any) u.ValRst {
 			ok := v == "" || strings.HasPrefix(v.(string), "image/")
 			return u.NewValRst(ok, "avatarType must have prefix - 'image/'")

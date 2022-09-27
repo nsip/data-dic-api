@@ -10,6 +10,37 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
+  /api/admin/users:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user filter with uname wildcard(*)
+        in: query
+        name: uname
+        type: string
+      - description: user filter with name wildcard(*)
+        in: query
+        name: name
+        type: string
+      - description: user filter with active status
+        in: query
+        name: active
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "401":
+          description: Fail - unauthorized error
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: get all users' info
+      tags:
+      - Admin
   /api/dictionary/auth/clear/{itemType}:
     delete:
       consumes:
@@ -244,23 +275,7 @@ paths:
         return all
       tags:
       - Dictionary
-  /api/sign-out/:
-    get:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK - sign-out successfully
-        "500":
-          description: Fail - internal error
-      security:
-      - ApiKeyAuth: []
-      summary: sign out action.
-      tags:
-      - Sign
-  /api/sign/in:
+  /api/user/sign-in:
     post:
       consumes:
       - multipart/form-data
@@ -287,8 +302,22 @@ paths:
           description: Fail - internal error
       summary: sign in action. if ok, got token
       tags:
-      - Sign
-  /api/sign/new:
+      - User
+  /api/user/sign-out:
+    put:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - sign-out successfully
+        "500":
+          description: Fail - internal error
+      summary: sign out action.
+      tags:
+      - User
+  /api/user/sign-up:
     post:
       consumes:
       - multipart/form-data
@@ -320,7 +349,7 @@ paths:
           description: Fail - internal error
       summary: sign up action, send user's basic info for registry
       tags:
-      - Sign
+      - User
 securityDefinitions:
   ApiKeyAuth:
     in: header

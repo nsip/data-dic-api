@@ -2,16 +2,16 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	signout "github.com/nsip/data-dic-api/server/api/sign-out"
+	ad "github.com/nsip/data-dic-api/server/api/admin"
 )
 
 // register to main echo Group
 
-// "/api/sign-out"
-func SignoutHandler(e *echo.Group) {
+// /api/admin
+func AdminHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
-		"/": signout.SignOut,
+		"/users":    ad.ListUser,		
 	}
 
 	var mPOST = map[string]echo.HandlerFunc{}
@@ -33,11 +33,11 @@ func SignoutHandler(e *echo.Group) {
 	}
 
 	mRegMethod := map[string]func(path string, h echo.HandlerFunc, m ...echo.MiddlewareFunc) *echo.Route{
-		"GET":    e.GET,
-		"POST":   e.POST,
-		"PUT":    e.PUT,
-		"DELETE": e.DELETE,
-		"PATCH":  e.PATCH,
+		"GET":    r.GET,
+		"POST":   r.POST,
+		"PUT":    r.PUT,
+		"DELETE": r.DELETE,
+		"PATCH":  r.PATCH,
 		// others...
 	}
 

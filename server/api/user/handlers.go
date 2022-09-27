@@ -1,18 +1,21 @@
-package sign
+package user
 
 import (
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
 
 	lk "github.com/digisan/logkit"
 	si "github.com/digisan/user-mgr/sign-in"
+	so "github.com/digisan/user-mgr/sign-out"
 	su "github.com/digisan/user-mgr/sign-up"
 	u "github.com/digisan/user-mgr/user"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 )
 
-// *** after implementing, register with path in 'sign.go' *** //
+// *** after implementing, register with path in 'user.go' *** //
 
 var (
 	MapUserClaims = &sync.Map{} // map[string]*u.UserClaims, *** record logged-in user claims  ***
@@ -21,7 +24,7 @@ var (
 // @Title register a new user
 // @Summary sign up action, send user's basic info for registry
 // @Description
-// @Tags    Sign
+// @Tags    User
 // @Accept  multipart/form-data
 // @Produce json
 // @Param   uname   formData   string  true  "unique user name"
@@ -30,10 +33,10 @@ var (
 // @Success 200 "OK - then waiting for verification code"
 // @Failure 400 "Fail - invalid registry fields"
 // @Failure 500 "Fail - internal error"
-// @Router /api/sign/new [post]
+// @Router /api/user/sign-up [post]
 func NewUser(c echo.Context) error {
 
-	// lk.Debug("[%v] [%v] [%v]", c.FormValue("uname"), c.FormValue("email"), c.FormValue("pwd"))
+	lk.Debug("[%v] [%v] [%v]", c.FormValue("uname"), c.FormValue("email"), c.FormValue("pwd"))
 
 	user := &u.User{
 		Core: u.Core{
@@ -97,7 +100,7 @@ func NewUser(c echo.Context) error {
 // @Title sign in
 // @Summary sign in action. if ok, got token
 // @Description
-// @Tags    Sign
+// @Tags    User
 // @Accept  multipart/form-data
 // @Produce json
 // @Param   uname formData string true "user name or email"
@@ -105,7 +108,7 @@ func NewUser(c echo.Context) error {
 // @Success 200 "OK - sign-in successfully"
 // @Failure 400 "Fail - incorrect password"
 // @Failure 500 "Fail - internal error"
-// @Router /api/sign/in [post]
+// @Router /api/user/sign-in [post]
 func LogIn(c echo.Context) error {
 
 	var (
@@ -151,4 +154,33 @@ func LogIn(c echo.Context) error {
 		"token": token,
 		"auth":  "Bearer " + token,
 	})
+}
+
+// @Title sign out
+// @Summary sign out action.
+// @Description
+// @Tags    User
+// @Accept  json
+// @Produce json
+// @Success 200 "OK - sign-out successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/user/sign-out [put]
+func SignOut(c echo.Context) error {
+	var (
+		userTkn = c.Get("user").(*jwt.Token)
+		claims  = userTkn.Claims.(*u.UserClaims)
+		uname   = claims.UName
+	)
+
+	defer claims.DeleteToken() // only in SignOut calling DeleteToken()
+
+	// remove user claims for 'uname'
+	defer MapUserClaims.Delete(uname)
+
+	if err := so.Logout(uname); err != nil {
+		lk.Warn("%v", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, fmt.Sprintf("[%s] sign-out successfully", uname))
 }

@@ -125,18 +125,18 @@ func echoHost(done chan<- string) {
 
 		// groups without middleware
 		{
-			api.SignHandler(e.Group("/api/sign"))
+			api.SignHandler(e.Group("/api/user"))
 			api.DicPubHandler(e.Group("/api/dictionary/pub"))
 		}
 
 		// other groups with middleware
 		groups := []string{
 			"/api/dictionary/auth",
-			"/api/sign-out",
+			"/api/admin",
 		}
 		handlers := []func(*echo.Group){
 			api.DicAuthHandler,
-			api.SignoutHandler,
+			api.AdminHandler,
 		}
 		for i, group := range groups {
 			r := e.Group(group)

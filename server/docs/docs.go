@@ -22,6 +22,56 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admin/users": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "get all users' info",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user filter with uname wildcard(*)",
+                        "name": "uname",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "user filter with name wildcard(*)",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "user filter with active status",
+                        "name": "active",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - list successfully"
+                    },
+                    "401": {
+                        "description": "Fail - unauthorized error"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/auth/clear/{itemType}": {
             "delete": {
                 "security": [
@@ -388,34 +438,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/sign-out/": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Sign"
-                ],
-                "summary": "sign out action.",
-                "responses": {
-                    "200": {
-                        "description": "OK - sign-out successfully"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/sign/in": {
+        "/api/user/sign-in": {
             "post": {
                 "consumes": [
                     "multipart/form-data"
@@ -424,7 +447,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Sign"
+                    "User"
                 ],
                 "summary": "sign in action. if ok, got token",
                 "parameters": [
@@ -457,7 +480,29 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/sign/new": {
+        "/api/user/sign-out": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "sign out action.",
+                "responses": {
+                    "200": {
+                        "description": "OK - sign-out successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/user/sign-up": {
             "post": {
                 "consumes": [
                     "multipart/form-data"
@@ -466,7 +511,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Sign"
+                    "User"
                 ],
                 "summary": "sign up action, send user's basic info for registry",
                 "parameters": [

@@ -2,22 +2,25 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/nsip/data-dic-api/server/api/sign"
+	"github.com/nsip/data-dic-api/server/api/user"
 )
 
 // register to main echo Group
 
-// "/api/sign"
+// /api/user/
 func SignHandler(e *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{}
 
 	var mPOST = map[string]echo.HandlerFunc{
-		"/new": sign.NewUser,
-		"/in":  sign.LogIn,
+		"/sign-up": user.NewUser,
+		"/sign-in": user.LogIn,
 	}
 
-	var mPUT = map[string]echo.HandlerFunc{}
+	var mPUT = map[string]echo.HandlerFunc{
+		"/sign-out": user.SignOut,
+	}
+
 	var mDELETE = map[string]echo.HandlerFunc{}
 	var mPATCH = map[string]echo.HandlerFunc{}
 
