@@ -24,7 +24,7 @@ import (
 
 var (
 	fHttp2 = false //
-	port   = 1323  // note: keep same as below @host
+	port   = 1323  // note: keep same as below @host // swagger ip for local test : 192.168.31.8
 )
 
 func init() {
@@ -125,6 +125,7 @@ func echoHost(done chan<- string) {
 
 		// groups without middleware
 		{
+			api.SystemHandler(e.Group("/api/system"))
 			api.SignHandler(e.Group("/api/user"))
 			api.DicPubHandler(e.Group("/api/dictionary/pub"))
 		}

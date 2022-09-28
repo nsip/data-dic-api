@@ -2,8 +2,6 @@
 
 set -e
 
-rm -rf ./prelease/prelease
-
 rm -rf ./server/__debug_bin
 rm -rf ./server/server
 rm -rf ./server/tmp*
@@ -19,7 +17,9 @@ then
 
 else
 
-    rm -rf ./server/build/linux64
+    rm -rf ./server/build/linux64/server*
+    rm -rf ./server/build/linux64/process
+    rm -rf ./server/build/linux64/tmp-locker
     
 fi
 

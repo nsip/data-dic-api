@@ -1,4 +1,4 @@
-host: 127.0.0.1:1323
+host: 192.168.31.8:1323
 info:
   contact:
     name: API Support
@@ -10,7 +10,7 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
-  /api/admin/users:
+  /api/admin/user/list/{rType}:
     get:
       consumes:
       - application/json
@@ -27,6 +27,10 @@ paths:
         in: query
         name: active
         type: string
+      - description: which user's field want to list
+        in: path
+        name: rType
+        type: string
       produces:
       - application/json
       responses:
@@ -38,7 +42,7 @@ paths:
           description: Fail - internal error
       security:
       - ApiKeyAuth: []
-      summary: get all users' info
+      summary: list users' info
       tags:
       - Admin
   /api/dictionary/auth/clear/{itemType}:
@@ -275,6 +279,30 @@ paths:
         return all
       tags:
       - Dictionary
+  /api/system/tag:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - get its tag
+      summary: get this api service project github version tag
+      tags:
+      - System
+  /api/system/ver:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - get its version
+      summary: get this api service version
+      tags:
+      - System
   /api/user/sign-in:
     post:
       consumes:

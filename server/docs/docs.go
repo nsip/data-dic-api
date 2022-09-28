@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/admin/users": {
+        "/api/admin/user/list/{rType}": {
             "get": {
                 "security": [
                     {
@@ -38,7 +38,7 @@ const docTemplate = `{
                 "tags": [
                     "Admin"
                 ],
-                "summary": "get all users' info",
+                "summary": "list users' info",
                 "parameters": [
                     {
                         "type": "string",
@@ -57,6 +57,12 @@ const docTemplate = `{
                         "description": "user filter with active status",
                         "name": "active",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "which user's field want to list",
+                        "name": "rType",
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -438,6 +444,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/system/tag": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "get this api service project github version tag",
+                "responses": {
+                    "200": {
+                        "description": "OK - get its tag"
+                    }
+                }
+            }
+        },
+        "/api/system/ver": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "get this api service version",
+                "responses": {
+                    "200": {
+                        "description": "OK - get its version"
+                    }
+                }
+            }
+        },
         "/api/user/sign-in": {
             "post": {
                 "consumes": [
@@ -564,7 +608,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1:1323",
+	Host:             "192.168.31.8:1323",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "National Education Data Dictionary API",

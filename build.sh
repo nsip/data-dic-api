@@ -9,6 +9,11 @@ W=`tput sgr0`
 
 cd ./server
 
+# create version info as hard-coded
+cd ./auto-gen
+go run .
+cd -
+
 GOARCH=amd64
 LDFLAGS="-s -w"
 

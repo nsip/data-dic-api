@@ -2,18 +2,18 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	ad "github.com/nsip/data-dic-api/server/api/admin"
+	"github.com/nsip/data-dic-api/server/api/system"
 )
 
 // register to main echo Group
 
-// /api/admin
-func AdminHandler(r *echo.Group) {
+// "/api/system"
+func SystemHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
-		"/user/list/:rType": ad.ListUser,
+		"/ver": system.Ver,
+		"/tag": system.Tag,
 	}
-
 	var mPOST = map[string]echo.HandlerFunc{}
 	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{}

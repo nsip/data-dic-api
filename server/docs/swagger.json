@@ -12,9 +12,9 @@
         },
         "version": "1.0"
     },
-    "host": "127.0.0.1:1323",
+    "host": "192.168.31.8:1323",
     "paths": {
-        "/api/admin/users": {
+        "/api/admin/user/list/{rType}": {
             "get": {
                 "security": [
                     {
@@ -30,7 +30,7 @@
                 "tags": [
                     "Admin"
                 ],
-                "summary": "get all users' info",
+                "summary": "list users' info",
                 "parameters": [
                     {
                         "type": "string",
@@ -49,6 +49,12 @@
                         "description": "user filter with active status",
                         "name": "active",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "which user's field want to list",
+                        "name": "rType",
+                        "in": "path"
                     }
                 ],
                 "responses": {
@@ -426,6 +432,44 @@
                     },
                     "500": {
                         "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/system/tag": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "get this api service project github version tag",
+                "responses": {
+                    "200": {
+                        "description": "OK - get its tag"
+                    }
+                }
+            }
+        },
+        "/api/system/ver": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "System"
+                ],
+                "summary": "get this api service version",
+                "responses": {
+                    "200": {
+                        "description": "OK - get its version"
                     }
                 }
             }
