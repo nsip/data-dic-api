@@ -2,7 +2,6 @@ package dic
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -16,9 +15,10 @@ import (
 	"github.com/digisan/gotk/strs"
 	tc "github.com/digisan/gotk/type-check"
 	lk "github.com/digisan/logkit"
+	u "github.com/digisan/user-mgr/user"
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/nsip/data-dic-api/server/api/db"
-	in "github.com/nsip/data-dic-api/server/ingest"
 	"github.com/tidwall/gjson"
 )
 
@@ -26,7 +26,7 @@ var (
 	mListCache = make(map[string][]string)
 )
 
-// @Title insert or update one dictionary item
+// @Title   insert or update one dictionary item
 // @Summary insert or update one entity or collection data by json payload
 // @Description
 // @Tags    Dictionary
@@ -43,7 +43,10 @@ func Upsert(c echo.Context) error {
 	lk.Log("Enter: Post Upsert")
 
 	var (
-		dataRdr = c.Request().Body
+		userTkn = c.Get("user").(*jwt.Token)     //
+		claims  = userTkn.Claims.(*u.UserClaims) //
+		author  = claims.UName                   // author
+		dataRdr = c.Request().Body               // data
 	)
 
 	if dataRdr != nil {
@@ -57,20 +60,20 @@ func Upsert(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "entity data read error: "+err.Error())
 	}
 
-	// check payload type
 	//
-	inType := ""
-	switch {
-	case json.Unmarshal(data, &EntityType{}) == nil:
-		inType = "entity"
-	case json.Unmarshal(data, &CollectionType{}) == nil:
-		inType = "collection"
-	default:
+	// check payload kind
+	//
+	inKind := db.ItemKind(data)
+	if len(inKind) == 0 {
 		return c.String(http.StatusBadRequest, "invalid payload, cannot be converted to entity or collection")
 	}
 
+	//
+	// payload json string
+	//
 	js := string(data)
 
+	//
 	// check json value type
 	//
 	flagHtml := false
@@ -79,6 +82,7 @@ func Upsert(c echo.Context) error {
 		flagHtml = true
 	}
 
+	//
 	// validate payload
 	//
 	name := gjson.Get(js, "Entity").String()
@@ -99,131 +103,142 @@ func Upsert(c echo.Context) error {
 
 	//////////////////////////////////////////////////////////
 
-	cfg, ok := db.CfgGrp[inType]
+	cfg, ok := db.CfgGrp[inKind]
 	if !ok {
-		return c.String(http.StatusBadRequest, "objType only can be [entity collection]")
+		return c.String(http.StatusBadRequest, "item kind can only be [entity collection]")
 	}
 
-	mh.UseDbCol(cfg.Db, IF(flagHtml, cfg.ColHtml, cfg.ColText))
+	mh.UseDbCol(db.DATABASE, IF(flagHtml, cfg.DbColHtml, cfg.DbColText))
 
+	//
 	// ingest inbound data into db(text/html), if entity already exists, replace old one
+	//
 	IdOrCnt, data, err := mh.Upsert(bytes.NewReader(data), "Entity", name)
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, "error in db upsert: "+err.Error())
 	}
 
+	//
 	// save inbound json file to local folder
+	//
 	if len(data) > 0 {
-
-		// TO inbound directory
+		// to inbound directory
 		dir := IF(flagHtml, cfg.DirHtml, cfg.DirText)
 		if err := os.WriteFile(filepath.Join(dir, name+".json"), data, os.ModePerm); err != nil {
+			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, "error in writing file to inbound: "+err.Error())
 		}
+	}
 
-		// TO renamed directory
-		if !flagHtml {
-			dir := cfg.DirExisting
-			if err := os.WriteFile(filepath.Join(dir, name+".json"), data, os.ModePerm); err != nil {
-				return c.String(http.StatusInternalServerError, "error in writing file to existing directory: "+err.Error())
-			}
-		}
+	//////////////////////////////////////////////////////////
 
-		// Re ingest all, then update db(entities/collections)
-		if err := in.IngestViaCmd(false); err != nil {
+	//
+	// record item(text) into author db collection
+	//
+	if !flagHtml {
+		if err := db.RecordAction(author, db.Submit, name, inKind); err != nil {
+			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 	}
+
 	return c.JSON(http.StatusOK, IdOrCnt)
 }
 
-// @Title get all items
+// @Title   get all items
 // @Summary get all entities' or collections' full content
 // @Description
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   itemType path  string true  "item type, only can be 'entity' or 'collection'"
-// @Param   name     query string false "entity/collection 'Entity' name for query. if empty, get all"
+// @Param   kind  path  string true  "item type, can only be [entity collection]"
+// @Param   name  query string false "entity/collection 'Entity' name for query. if empty, get all"
+// @Param   dbcol query string true  "from which db collection? [existing, text, html]"
 // @Success 200 "OK - get successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/pub/items/{itemType} [get]
+// @Router /api/dictionary/pub/items/{kind} [get]
 func Items(c echo.Context) error {
 
 	lk.Log("Enter: Get All")
 
 	var (
-		itemType = c.Param("itemType")  // entity or collection
-		name     = c.QueryParam("name") // entity or collection's "Entity" value
+		kind  = c.Param("kind")       // entity or collection
+		name  = c.QueryParam("name")  // entity or collection's "Entity" value
+		dbcol = c.QueryParam("dbcol") // existing, text, html
 	)
 
-	cfg, ok := db.CfgGrp[itemType]
+	cfg, ok := db.CfgGrp[kind]
 	if !ok {
-		return c.String(http.StatusBadRequest, "itemType can only be [entity collection]")
+		return c.String(http.StatusBadRequest, "'kind' can only be [entity collection]")
 	}
 
 	var (
 		result any
 		err    error
 	)
-	switch itemType {
+	switch kind {
 	case "entity":
-		result, err = db.Many[EntityType](cfg, name)
+		result, err = db.Many[db.EntityType](cfg, db.DbColType(dbcol), name)
 	case "collection":
-		result, err = db.Many[CollectionType](cfg, name)
+		result, err = db.Many[db.CollectionType](cfg, db.DbColType(dbcol), name)
 	}
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, result)
 }
 
-// @Title list all items' name
+// @Title   list all items' name
 // @Summary list all entities' or collections' name
 // @Description
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   itemType path  string true  "item type, only can be 'entity' or 'collection'"
-// @Param   name     query string false "entity/collection 'Entity' name for query. if empty, get all"
+// @Param   kind  path  string true  "item type, can only be [entity collection]"
+// @Param   name  query string false "entity/collection 'Entity' name for query. if empty, get all"
+// @Param   dbcol query string true  "from which db collection? [existing, text, html]"
 // @Success 200 "OK - list successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/pub/list/{itemType} [get]
+// @Router /api/dictionary/pub/list/{kind} [get]
 func List(c echo.Context) error {
 
 	lk.Log("Enter: Get List")
 
 	var (
-		itemType = c.Param("itemType")  // entity or collection
-		name     = c.QueryParam("name") // entity or collection's "Entity" value
+		kind  = c.Param("kind")       // entity or collection
+		name  = c.QueryParam("name")  // entity or collection's "Entity" value
+		dbcol = c.QueryParam("dbcol") // existing, text, html
 	)
 
-	cfg, ok := db.CfgGrp[itemType]
+	cfg, ok := db.CfgGrp[kind]
 	if !ok {
-		return c.String(http.StatusBadRequest, "itemType can only be [entity collection]")
+		return c.String(http.StatusBadRequest, "'kind' can only be [entity collection]")
 	}
 
 	var (
 		names []string
 		err   error
 	)
-	switch itemType {
+	switch kind {
 	case "entity":
-		names, err = db.ListMany[EntityType](cfg, name)
+		names, err = db.ListMany[db.EntityType](cfg, db.DbColType(dbcol), name)
 	case "collection":
-		names, err = db.ListMany[CollectionType](cfg, name)
+		names, err = db.ListMany[db.CollectionType](cfg, db.DbColType(dbcol), name)
 	}
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	// cache list
-	mListCache[itemType] = names
+	mListCache[kind] = names
 
 	return c.JSON(http.StatusOK, names)
 }
 
-// @Title get one item
+// @Title   get one item
 // @Summary get one entity or collection by its 'Entity' name
 // @Description
 // @Tags    Dictionary
@@ -231,6 +246,7 @@ func List(c echo.Context) error {
 // @Produce json
 // @Param   name  query string  true "Entity name"
 // @Param   fuzzy query boolean false "regex applies?" false
+// @Param   dbcol query string true  "from which db collection? [existing, text, html]"
 // @Success 200 "OK - got successfully"
 // @Failure 400 "Fail - invalid parameters"
 // @Failure 404 "Fail - not found"
@@ -243,6 +259,7 @@ func One(c echo.Context) error {
 	var (
 		name     = c.QueryParam("name")
 		fuzzyStr = c.QueryParam("fuzzy")
+		dbcol    = c.QueryParam("dbcol") // existing, text, html
 		fuzzy    = false
 		err      error
 	)
@@ -254,18 +271,19 @@ func One(c echo.Context) error {
 		}
 	}
 
-	for itemType, cfg := range db.CfgGrp {
+	for kind, cfg := range db.CfgGrp {
 		var (
 			result any = nil
 			err    error
 		)
-		switch itemType {
+		switch kind {
 		case "entity":
-			result, err = db.One[EntityType](cfg, name, fuzzy)
+			result, err = db.One[db.EntityType](cfg, db.DbColType(dbcol), name, fuzzy)
 		case "collection":
-			result, err = db.One[CollectionType](cfg, name, fuzzy)
+			result, err = db.One[db.CollectionType](cfg, db.DbColType(dbcol), name, fuzzy)
 		}
 		if err != nil {
+			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		if !tc.IsNil(result) {
@@ -278,13 +296,14 @@ func One(c echo.Context) error {
 	return c.String(http.StatusNotFound, fmt.Sprintf(`[%v] is not existing`, name))
 }
 
-// @Title delete one item
+// @Title   delete one item
 // @Summary delete one entity or collection by its 'Entity' name
 // @Description
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   name query string true "Entity name for deleting"
+// @Param   name  query string true "Entity name for deleting"
+// @Param   dbcol query string true "from which db collection? [existing, text, html]"
 // @Success 200 "OK - deleted successfully"
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/auth/one [delete]
@@ -294,20 +313,22 @@ func Delete(c echo.Context) error {
 	lk.Log("Enter: Delete Delete")
 
 	var (
-		name = c.QueryParam("name")
+		name  = c.QueryParam("name")
+		dbcol = c.QueryParam("dbcol") // existing, text, html
 	)
-	for itemType, cfg := range db.CfgGrp {
+	for kind, cfg := range db.CfgGrp {
 		var (
 			n   int
 			err error
 		)
-		switch itemType {
+		switch kind {
 		case "entity":
-			n, err = db.Del[EntityType](cfg, name)
+			n, err = db.Del[db.EntityType](cfg, db.DbColType(dbcol), name)
 		case "collection":
-			n, err = db.Del[CollectionType](cfg, name)
+			n, err = db.Del[db.CollectionType](cfg, db.DbColType(dbcol), name)
 		}
 		if err != nil {
+			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
 		if n > 0 {
@@ -317,48 +338,51 @@ func Delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, struct{ CountDeleted int }{0})
 }
 
-// @Title delete all items
+// @Title   delete all items
 // @Summary delete all entities or collections (dangerous)
 // @Description
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   itemType path string true "item type, only can be 'entity' or 'collection'"
+// @Param   kind  path  string true "item type, can only be [entity collection]"
+// @Param   dbcol query string true "which db collection? [existing, text, html]"
 // @Success 200 "OK - cleared successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/dictionary/auth/clear/{itemType} [delete]
+// @Router /api/dictionary/auth/clear/{kind} [delete]
 // @Security ApiKeyAuth
 func Clear(c echo.Context) error {
 
 	lk.Log("Enter: Delete Clear")
 
 	var (
-		itemType = c.Param("itemType") // entity or collection
+		kind  = c.Param("kind")       // entity or collection
+		dbcol = c.QueryParam("dbcol") // existing, text, html
 	)
 
-	cfg, ok := db.CfgGrp[itemType]
+	cfg, ok := db.CfgGrp[kind]
 	if !ok {
-		return c.String(http.StatusBadRequest, "itemType can only be [entity collection]")
+		return c.String(http.StatusBadRequest, "'kind' can only be [entity collection]")
 	}
 
 	var (
 		n   int
 		err error
 	)
-	switch itemType {
+	switch kind {
 	case "entity":
-		n, err = db.Clr[EntityType](cfg)
+		n, err = db.Clr[db.EntityType](cfg, db.DbColType(dbcol))
 	case "collection":
-		n, err = db.Clr[CollectionType](cfg)
+		n, err = db.Clr[db.CollectionType](cfg, db.DbColType(dbcol))
 	}
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, struct{ CountDeleted int }{n})
 }
 
-// @Title check item's kind by its name
+// @Title   check item's kind by its name
 // @Summary check item's kind ('entity' or 'collection') by its name
 // @Description
 // @Tags    Dictionary
@@ -398,9 +422,9 @@ func CheckItemKind(c echo.Context) error {
 	}
 }
 
-//////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
-// @Title get related entities of a collection
+// @Title   get related entities of a collection
 // @Summary get related entities' name of a collection
 // @Description
 // @Tags    Dictionary
@@ -417,14 +441,15 @@ func ColEntities(c echo.Context) error {
 	var (
 		name = c.QueryParam("colname")
 	)
-	rt, err := db.ColEntities(db.CfgGrp["collection"], name) // only use cfg's dbName, colName is fixed.
+	rt, err := db.ColEntities(name) // only use cfg's dbName, colName is fixed.
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, rt)
 }
 
-// @Title get class info of an entity
+// @Title   get class info of an entity
 // @Summary get class info (derived path & children) of an entity
 // @Description
 // @Tags    Dictionary
@@ -441,8 +466,9 @@ func EntClasses(c echo.Context) error {
 	var (
 		name = c.QueryParam("entname")
 	)
-	derived, children, err := db.EntClasses(db.CfgGrp["entity"], name) // only use cfg's dbName, colName is fixed.
+	derived, children, err := db.EntClasses(name) // only use cfg's dbName, colName is fixed.
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, struct {
@@ -451,7 +477,7 @@ func EntClasses(c echo.Context) error {
 	}{derived, children})
 }
 
-// @Title get list of item's name by searching
+// @Title   get list of item's name by searching
 // @Summary get list of entity's & collection's name by searching. If not given, return all
 // @Description
 // @Tags    Dictionary
@@ -485,12 +511,100 @@ func FullTextSearch(c echo.Context) error {
 	if err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
-	entities, collections, err := db.FullTextSearch(db.CfgGrp["entity"], aim, flagIgnCase) // only use cfg's dbName, colName is fixed.
+	entities, collections, err := db.FullTextSearch(aim, flagIgnCase)
 	if err != nil {
+		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, struct {
 		Entities    []string
 		Collections []string
 	}{entities, collections})
+}
+
+// @Title   approve one dictionary item
+// @Summary approve one dictionary candidate item
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   name query string true "entity/collection 'Entity' name for approval"
+// @Param   kind query string true "item type, can only be [entity collection]"
+// @Success 200 "OK - approve successfully"
+// @Failure 400 "Fail - invalid parameters or request body"
+// @Failure 404 "Fail - couldn't find item to approve"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/auth/approve [put]
+// @Security ApiKeyAuth
+func Approve(c echo.Context) error {
+
+	lk.Log("Enter: Put Approve")
+
+	var (
+		userTkn  = c.Get("user").(*jwt.Token)     //
+		claims   = userTkn.Claims.(*u.UserClaims) //
+		approver = claims.UName                   // approver
+		name     = c.QueryParam("name")           // item name
+		kind     = c.QueryParam("kind")           // item kind
+	)
+
+	cfg, ok := db.CfgGrp[kind]
+	if !ok {
+		return c.String(http.StatusBadRequest, "kind can only be [entity collection]")
+	}
+
+	//
+	// 1. delete from inbound text db collection. KEEP html for future format query
+	//
+	mh.UseDbCol(db.DATABASE, cfg.DbColText)
+
+	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, name)
+	n, _, err := mh.DeleteOne[any](strings.NewReader(sFilter))
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if n != 1 {
+		lk.Warn("deleted N: %v", n)
+		return c.String(http.StatusNotFound, fmt.Sprintf("couldn't find [%v], approved nothing", name))
+	}
+
+	//
+	// 2. record into existing db collection
+	//
+	mh.UseDbCol(db.DATABASE, cfg.DbColExisting)
+
+	var (
+		from = filepath.Join(cfg.DirText, name+".json")
+		to   = filepath.Join(cfg.DirExisting, name+".json")
+	)
+
+	file, err := os.Open(from)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	_, _, err = mh.Upsert(file, "Entity", name)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	//
+	// 3. move file from text to existing
+	//
+	if err := os.Rename(from, to); err != nil {
+		lk.WarnOnErr("%v", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	//
+	// 4. record into approver db collection
+	//
+	if err := db.RecordAction(approver, db.Approve, name, kind); err != nil {
+		lk.WarnOnErr("%v", err)
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is approved by [%v]", name, approver))
 }

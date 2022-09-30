@@ -6,12 +6,12 @@ import (
 )
 
 func TestDel(t *testing.T) {
-	fmt.Println(Del[any](CfgEnt, "test 3"))
-	fmt.Println(Del[any](CfgCol, "test 3"))
+	fmt.Println(Del[any](CfgEntity, Existing, "test 3"))
+	fmt.Println(Del[any](CfgCollection, Existing, "test 3"))
 }
 
 func TestColEntities(t *testing.T) {
-	entities, err := ColEntities(CfgCol, "NAPLAN Student Registration")
+	entities, err := ColEntities("NAPLAN Student Registration")
 	fmt.Println(err)
 	for _, en := range entities {
 		fmt.Println(en)
@@ -19,7 +19,7 @@ func TestColEntities(t *testing.T) {
 }
 
 func TestEntClasses(t *testing.T) {
-	derived, children, err := EntClasses(CfgEnt, "Staff")
+	derived, children, err := EntClasses("Staff")
 	fmt.Println(err)
 	fmt.Println("-----")
 	for _, en := range derived {
@@ -32,7 +32,7 @@ func TestEntClasses(t *testing.T) {
 }
 
 func TestFullTextSearchh(t *testing.T) {
-	ents, cols, err := FullTextSearch(CfgEnt, "http", false)
+	ents, cols, err := FullTextSearch("http", false)
 	fmt.Println(err)
 	fmt.Println("-----")
 	for _, ent := range ents {

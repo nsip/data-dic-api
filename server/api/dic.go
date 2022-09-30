@@ -11,13 +11,13 @@ import (
 func DicPubHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
-		"/items/:itemType": dic.Items,
-		"/list/:itemType":  dic.List,
-		"/one":             dic.One,
-		"/colentities":     dic.ColEntities,
-		"/entclasses":      dic.EntClasses,
-		"/search":          dic.FullTextSearch,
-		"/kind":            dic.CheckItemKind,
+		"/items/:kind": dic.Items,
+		"/list/:kind":  dic.List,
+		"/one":         dic.One,
+		"/colentities": dic.ColEntities,
+		"/entclasses":  dic.EntClasses,
+		"/search":      dic.FullTextSearch,
+		"/kind":        dic.CheckItemKind,
 	}
 	var mPOST = map[string]echo.HandlerFunc{}
 	var mPUT = map[string]echo.HandlerFunc{}
@@ -66,10 +66,12 @@ func DicAuthHandler(r *echo.Group) {
 	var mPOST = map[string]echo.HandlerFunc{
 		"/upsert": dic.Upsert,
 	}
-	var mPUT = map[string]echo.HandlerFunc{}
+	var mPUT = map[string]echo.HandlerFunc{
+		"/approve": dic.Approve,
+	}
 	var mDELETE = map[string]echo.HandlerFunc{
-		"/one":             dic.Delete,
-		"/clear/:itemType": dic.Clear,
+		"/one":         dic.Delete,
+		"/clear/:kind": dic.Clear,
 	}
 	var mPATCH = map[string]echo.HandlerFunc{}
 

@@ -1,4 +1,4 @@
-host: 192.168.31.8:1323
+host: 127.0.0.1:1323
 info:
   contact:
     name: API Support
@@ -45,14 +45,48 @@ paths:
       summary: list users' info
       tags:
       - Admin
-  /api/dictionary/auth/clear/{itemType}:
+  /api/dictionary/auth/approve:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: entity/collection 'Entity' name for approval
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: item type, can only be [entity collection]
+        in: query
+        name: kind
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - approve successfully
+        "400":
+          description: Fail - invalid parameters or request body
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: approve one dictionary candidate item
+      tags:
+      - Dictionary
+  /api/dictionary/auth/clear/{kind}:
     delete:
       consumes:
       - application/json
       parameters:
-      - description: item type, only can be 'entity' or 'collection'
+      - description: item type, can only be [entity collection]
         in: path
-        name: itemType
+        name: kind
+        required: true
+        type: string
+      - description: which db collection? [existing, text, html]
+        in: query
+        name: dbcol
         required: true
         type: string
       produces:
@@ -75,6 +109,11 @@ paths:
       - description: Entity name for deleting
         in: query
         name: name
+        required: true
+        type: string
+      - description: from which db collection? [existing, text, html]
+        in: query
+        name: dbcol
         required: true
         type: string
       produces:
@@ -155,19 +194,24 @@ paths:
       summary: get class info (derived path & children) of an entity
       tags:
       - Dictionary
-  /api/dictionary/pub/items/{itemType}:
+  /api/dictionary/pub/items/{kind}:
     get:
       consumes:
       - application/json
       parameters:
-      - description: item type, only can be 'entity' or 'collection'
+      - description: item type, can only be [entity collection]
         in: path
-        name: itemType
+        name: kind
         required: true
         type: string
       - description: entity/collection 'Entity' name for query. if empty, get all
         in: query
         name: name
+        type: string
+      - description: from which db collection? [existing, text, html]
+        in: query
+        name: dbcol
+        required: true
         type: string
       produces:
       - application/json
@@ -201,19 +245,24 @@ paths:
       summary: check item's kind ('entity' or 'collection') by its name
       tags:
       - Dictionary
-  /api/dictionary/pub/list/{itemType}:
+  /api/dictionary/pub/list/{kind}:
     get:
       consumes:
       - application/json
       parameters:
-      - description: item type, only can be 'entity' or 'collection'
+      - description: item type, can only be [entity collection]
         in: path
-        name: itemType
+        name: kind
         required: true
         type: string
       - description: entity/collection 'Entity' name for query. if empty, get all
         in: query
         name: name
+        type: string
+      - description: from which db collection? [existing, text, html]
+        in: query
+        name: dbcol
+        required: true
         type: string
       produces:
       - application/json
@@ -239,6 +288,11 @@ paths:
         in: query
         name: fuzzy
         type: boolean
+      - description: from which db collection? [existing, text, html]
+        in: query
+        name: dbcol
+        required: true
+        type: string
       produces:
       - application/json
       responses:

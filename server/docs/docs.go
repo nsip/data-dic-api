@@ -78,7 +78,53 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/auth/clear/{itemType}": {
+        "/api/dictionary/auth/approve": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "approve one dictionary candidate item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "entity/collection 'Entity' name for approval",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - approve successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters or request body"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/auth/clear/{kind}": {
             "delete": {
                 "security": [
                     {
@@ -98,9 +144,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -136,6 +189,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Entity name for deleting",
                         "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
                         "in": "query",
                         "required": true
                     }
@@ -254,7 +314,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/pub/items/{itemType}": {
+        "/api/dictionary/pub/items/{kind}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -269,8 +329,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
                         "in": "path",
                         "required": true
                     },
@@ -279,6 +339,13 @@ const docTemplate = `{
                         "description": "entity/collection 'Entity' name for query. if empty, get all",
                         "name": "name",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -325,7 +392,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/dictionary/pub/list/{itemType}": {
+        "/api/dictionary/pub/list/{kind}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -340,8 +407,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
                         "in": "path",
                         "required": true
                     },
@@ -350,6 +417,13 @@ const docTemplate = `{
                         "description": "entity/collection 'Entity' name for query. if empty, get all",
                         "name": "name",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -387,6 +461,13 @@ const docTemplate = `{
                         "description": "regex applies?",
                         "name": "fuzzy",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -608,7 +689,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "192.168.31.8:1323",
+	Host:             "127.0.0.1:1323",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "National Education Data Dictionary API",

@@ -5,7 +5,7 @@ set -e
 rm -rf ./server/__debug_bin
 rm -rf ./server/server
 rm -rf ./server/tmp*
-# rm -rf ./server/data
+rm -rf ./server/data
 rm -rf ./server/api/db/data
 
 rm -rf ./data/out

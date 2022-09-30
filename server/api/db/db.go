@@ -1,11 +1,13 @@
 package db
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	mh "github.com/digisan/db-helper/mongo"
 	. "github.com/digisan/go-generics/v2"
@@ -18,16 +20,20 @@ func fieldStr[T any](v *T, field string) string {
 	return f.String()
 }
 
-func One[T any](cfg Config, EntName string, fuzzy bool) (*T, error) {
-	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, EntName)
+// from: existing, text, html
+func One[T any](cfg ItemConfig, from DbColType, itemName string, fuzzy bool) (*T, error) {
+	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, itemName)
 	if fuzzy {
-		sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, EntName)
+		sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, itemName)
 	}
 	lk.Log("sFilter %v", sFilter)
 
-	// existing db
-	//
-	mh.UseDbCol(cfg.Db, cfg.ColExisting)
+	COL := cfg.DbColVal(from)
+	if len(COL) == 0 {
+		return nil, fmt.Errorf("from DbCol can only be [existing, text, html]")
+	}
+
+	mh.UseDbCol(DATABASE, COL)
 	found, err := mh.FindOne[T](strings.NewReader(sFilter))
 	if err != nil {
 		return nil, err
@@ -35,17 +41,21 @@ func One[T any](cfg Config, EntName string, fuzzy bool) (*T, error) {
 	return found, nil
 }
 
-func Many[T any](cfg Config, EntName string) ([]*T, error) {
+// from: existing, text, html
+func Many[T any](cfg ItemConfig, from DbColType, itemName string) ([]*T, error) {
 	var rFilter io.Reader = nil // NOT using "*strings.Reader = nil" as nil interface
-	if len(EntName) > 0 {
-		sFilter := fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, EntName)
+	if len(itemName) > 0 {
+		sFilter := fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, itemName)
 		lk.Log("sFilter %v", sFilter)
 		rFilter = strings.NewReader(sFilter)
 	}
 
-	// existing db
-	//
-	mh.UseDbCol(cfg.Db, cfg.ColExisting)
+	COL := cfg.DbColVal(from)
+	if len(COL) == 0 {
+		return nil, fmt.Errorf("from ItemDbCol can only be [existing, text, html]")
+	}
+
+	mh.UseDbCol(DATABASE, COL)
 	found, err := mh.Find[T](rFilter)
 	if err != nil {
 		return nil, err
@@ -53,55 +63,46 @@ func Many[T any](cfg Config, EntName string) ([]*T, error) {
 	return found, nil
 }
 
-func ListMany[T any](cfg Config, EntName string) ([]string, error) {
-	found, err := Many[T](cfg, EntName)
+// from: existing, text, html
+func ListMany[T any](cfg ItemConfig, from DbColType, itemName string) ([]string, error) {
+	found, err := Many[T](cfg, from, itemName)
 	if err != nil {
 		return nil, err
 	}
 	return FilterMap(found, nil, func(i int, e *T) string { return fieldStr(e, "Entity") }), nil
 }
 
-func Del[T any](cfg Config, EntName string) (int, error) {
+// from: existing, text, html
+func Del[T any](cfg ItemConfig, from DbColType, itemName string) (int, error) {
 
-	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, EntName)
+	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, itemName)
 	lk.Log("sFilter %v", sFilter)
 
-	// existing db
-	//
-	mh.UseDbCol(cfg.Db, cfg.ColExisting)
-	nExisting, _, err := mh.DeleteOne[T](strings.NewReader(sFilter)) // MUST re-create reader
+	COL := cfg.DbColVal(from)
+	if len(COL) == 0 {
+		return 0, fmt.Errorf("from ItemDbCol can only be [existing, text, html]")
+	}
+
+	mh.UseDbCol(DATABASE, COL)
+	if COL == cfg.DbColHtml {
+		sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)>?%v<?"}}`, itemName)
+	}
+	nDeleted, _, err := mh.DeleteOne[T](strings.NewReader(sFilter)) // MUST re-create reader
 	if err != nil {
 		return 0, err
 	}
-
-	// inbound db, text
-	//
-	mh.UseDbCol(cfg.Db, cfg.ColText)
-	nText, _, err := mh.DeleteOne[T](strings.NewReader(sFilter)) // MUST re-create reader
-	if err != nil {
-		return 0, err
-	}
-
-	// inbound db, html (may change in future)
-	//
-	mh.UseDbCol(cfg.Db, cfg.ColHtml)
-	sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)>?%v<?"}}`, EntName)
-	nHtml, _, err := mh.DeleteOne[T](strings.NewReader(sFilter)) // MUST re-create reader
-	if err != nil {
-		return 0, err
-	}
-
-	return Max(nExisting, nText, nHtml), nil
+	return nDeleted, nil
 }
 
-func Clr[T any](cfg Config) (int, error) {
-	names, err := ListMany[T](cfg, "")
+// from: existing, text, html
+func Clr[T any](cfg ItemConfig, from DbColType) (int, error) {
+	names, err := ListMany[T](cfg, from, "")
 	if err != nil {
 		return 0, err
 	}
 	cnt := 0
 	for _, name := range names {
-		n, err := Del[T](cfg, name)
+		n, err := Del[T](cfg, from, name)
 		if err != nil {
 			return 0, err
 		}
@@ -110,11 +111,11 @@ func Clr[T any](cfg Config) (int, error) {
 	return cnt, nil
 }
 
-/////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 
-func ColEntities(cfg Config, ColName string) ([]string, error) {
+func ColEntities(ColName string) ([]string, error) {
 
-	mh.UseDbCol(cfg.Db, "colentities") // fixed collection name
+	mh.UseDbCol(DATABASE, "colentities") // fixed collection name
 
 	whole, err := mh.FindOne[map[string]any](nil) // only one
 	if err != nil {
@@ -132,9 +133,9 @@ func ColEntities(cfg Config, ColName string) ([]string, error) {
 	return rtStr, nil
 }
 
-func EntClasses(cfg Config, EntName string) ([]string, []string, error) {
+func EntClasses(EntName string) ([]string, []string, error) {
 
-	mh.UseDbCol(cfg.Db, "class") // fixed collection name
+	mh.UseDbCol(DATABASE, "class") // fixed collection name
 
 	whole, err := mh.FindOne[map[string]any](nil) // only one
 	if err != nil {
@@ -155,9 +156,9 @@ func EntClasses(cfg Config, EntName string) ([]string, []string, error) {
 	return strings.Split(c.Branch, "--"), c.Children, nil
 }
 
-func FullTextSearch(cfg Config, aim string, insensitive bool) ([]string, []string, error) {
+func FullTextSearch(aim string, insensitive bool) ([]string, []string, error) {
 
-	mh.UseDbCol(cfg.Db, "pathval") // fixed collection name
+	mh.UseDbCol(DATABASE, "pathval") // fixed collection name
 
 	var (
 		entities    = []string{}
@@ -199,4 +200,46 @@ func FullTextSearch(cfg Config, aim string, insensitive bool) ([]string, []strin
 		}
 	}
 	return entities, collections, err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// to: submit approve
+func RecordAction(user string, to DbColType, name, kind string) error {
+
+	mh.UseDbCol(DATABASE, CfgAction.DbColVal(to))
+
+	sFilter := fmt.Sprintf(`{"User": "%v"}`, user)
+	record, err := mh.FindOne[ActionRecord](strings.NewReader(sFilter))
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return err
+	}
+
+	if record == nil {
+		r := ActionRecord{
+			User:   user,
+			Action: string(to),
+			Did: []DidItem{{
+				Name:      name,
+				Kind:      kind,
+				Timestamp: time.Now(),
+			}},
+		}
+		_, _, err := mh.Upsert(bytes.NewReader(r.Marshal()), "User", user)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return err
+		}
+
+	} else {
+
+		record.Did = append(record.Did, DidItem{Name: name, Kind: kind, Timestamp: time.Now()})
+		_, _, err := mh.Upsert(bytes.NewReader(record.Marshal()), "User", user)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return err
+		}
+	}
+	return nil
 }

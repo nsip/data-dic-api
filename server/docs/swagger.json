@@ -12,7 +12,7 @@
         },
         "version": "1.0"
     },
-    "host": "192.168.31.8:1323",
+    "host": "127.0.0.1:1323",
     "paths": {
         "/api/admin/user/list/{rType}": {
             "get": {
@@ -70,7 +70,53 @@
                 }
             }
         },
-        "/api/dictionary/auth/clear/{itemType}": {
+        "/api/dictionary/auth/approve": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "approve one dictionary candidate item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "entity/collection 'Entity' name for approval",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - approve successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters or request body"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/auth/clear/{kind}": {
             "delete": {
                 "security": [
                     {
@@ -90,9 +136,16 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
                         "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -128,6 +181,13 @@
                         "type": "string",
                         "description": "Entity name for deleting",
                         "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
                         "in": "query",
                         "required": true
                     }
@@ -246,7 +306,7 @@
                 }
             }
         },
-        "/api/dictionary/pub/items/{itemType}": {
+        "/api/dictionary/pub/items/{kind}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -261,8 +321,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
                         "in": "path",
                         "required": true
                     },
@@ -271,6 +331,13 @@
                         "description": "entity/collection 'Entity' name for query. if empty, get all",
                         "name": "name",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -317,7 +384,7 @@
                 }
             }
         },
-        "/api/dictionary/pub/list/{itemType}": {
+        "/api/dictionary/pub/list/{kind}": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -332,8 +399,8 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "item type, only can be 'entity' or 'collection'",
-                        "name": "itemType",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
                         "in": "path",
                         "required": true
                     },
@@ -342,6 +409,13 @@
                         "description": "entity/collection 'Entity' name for query. if empty, get all",
                         "name": "name",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -379,6 +453,13 @@
                         "description": "regex applies?",
                         "name": "fuzzy",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
