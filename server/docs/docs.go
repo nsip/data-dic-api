@@ -118,6 +118,9 @@ const docTemplate = `{
                     "400": {
                         "description": "Fail - invalid parameters or request body"
                     },
+                    "404": {
+                        "description": "Fail - couldn't find item to approve"
+                    },
                     "500": {
                         "description": "Fail - internal error"
                     }

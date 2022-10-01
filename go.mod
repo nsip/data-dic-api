@@ -3,7 +3,7 @@ module github.com/nsip/data-dic-api
 go 1.19
 
 require (
-	github.com/digisan/db-helper v0.0.16
+	github.com/digisan/db-helper v0.0.17
 	github.com/digisan/go-generics v0.2.3
 	github.com/digisan/gotk v0.1.26
 	github.com/digisan/json-tool v0.1.6
@@ -65,7 +65,7 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
-	golang.org/x/net v0.0.0-20220927171203-f486391704dc // indirect
+	golang.org/x/net v0.0.0-20220930213112-107f3e3c3b0b // indirect
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
 	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 	golang.org/x/text v0.3.7 // indirect

@@ -209,8 +209,7 @@ func RecordAction(user string, to DbColType, name, kind string) error {
 
 	mh.UseDbCol(DATABASE, CfgAction.DbColVal(to))
 
-	sFilter := fmt.Sprintf(`{"User": "%v"}`, user)
-	record, err := mh.FindOne[ActionRecord](strings.NewReader(sFilter))
+	record, err := mh.FindOneAt[ActionRecord]("User", user)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
