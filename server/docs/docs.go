@@ -22,7 +22,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/admin/user/list/{rType}": {
+        "/api/admin/user/list/{field}": {
             "get": {
                 "security": [
                     {
@@ -61,7 +61,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "which user's field want to list",
-                        "name": "rType",
+                        "name": "field",
                         "in": "path"
                     }
                 ],
@@ -566,7 +566,31 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/sign-in": {
+        "/api/user/auth/uname": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "get uname",
+                "responses": {
+                    "200": {
+                        "description": "OK - got uname"
+                    }
+                }
+            }
+        },
+        "/api/user/pub/sign-in": {
             "post": {
                 "consumes": [
                     "multipart/form-data"
@@ -608,7 +632,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/sign-out": {
+        "/api/user/pub/sign-out": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -630,7 +654,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/user/sign-up": {
+        "/api/user/pub/sign-up": {
             "post": {
                 "consumes": [
                     "multipart/form-data"

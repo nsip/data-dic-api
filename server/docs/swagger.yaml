@@ -10,7 +10,7 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
-  /api/admin/user/list/{rType}:
+  /api/admin/user/list/{field}:
     get:
       consumes:
       - application/json
@@ -29,7 +29,7 @@ paths:
         type: string
       - description: which user's field want to list
         in: path
-        name: rType
+        name: field
         type: string
       produces:
       - application/json
@@ -359,7 +359,21 @@ paths:
       summary: get this api service version
       tags:
       - System
-  /api/user/sign-in:
+  /api/user/auth/uname:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - got uname
+      security:
+      - ApiKeyAuth: []
+      summary: get uname
+      tags:
+      - User
+  /api/user/pub/sign-in:
     post:
       consumes:
       - multipart/form-data
@@ -387,7 +401,7 @@ paths:
       summary: sign in action. if ok, got token
       tags:
       - User
-  /api/user/sign-out:
+  /api/user/pub/sign-out:
     put:
       consumes:
       - application/json
@@ -401,7 +415,7 @@ paths:
       summary: sign out action.
       tags:
       - User
-  /api/user/sign-up:
+  /api/user/pub/sign-up:
     post:
       consumes:
       - multipart/form-data
