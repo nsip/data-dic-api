@@ -404,17 +404,15 @@ func CheckItemKind(c echo.Context) error {
 	if len(mListCache) == 0 {
 		return c.String(http.StatusInternalServerError, "list cache hasn't been loaded")
 	}
-	for kind, list := range mListCache {
-		if len(list) == 0 {
-			return c.String(http.StatusInternalServerError, fmt.Sprintf("[%s] list hasn't been loaded", kind))
-		}
-	}
+
+	lsEntity, okEntity := mListCache["entity"]
+	lsCollection, okCollection := mListCache["collection"]
 
 	switch {
-	case strs.IsIn(true, true, name, mListCache["entity"]...):
+	case okEntity && strs.IsIn(true, true, name, lsEntity...):
 		return c.JSON(http.StatusOK, "entity")
 
-	case strs.IsIn(true, true, name, mListCache["collection"]...):
+	case okCollection && strs.IsIn(true, true, name, lsCollection...):
 		return c.JSON(http.StatusOK, "collection")
 
 	default:

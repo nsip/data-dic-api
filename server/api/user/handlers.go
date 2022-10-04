@@ -195,10 +195,14 @@ func SignOut(c echo.Context) error {
 // @Router /api/user/auth/uname [get]
 // @Security ApiKeyAuth
 func GetUname(c echo.Context) error {
+
+	lk.Log("Enter: GetUname")
+
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)
 		uname   = claims.UName
 	)
+	// lk.Debug(uname)
 	return c.JSON(http.StatusOK, uname)
 }

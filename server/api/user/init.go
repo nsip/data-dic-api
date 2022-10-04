@@ -33,7 +33,7 @@ func init() {
 
 	// monitor active users
 	ctx, Cancel = context.WithCancel(context.Background())
-	monitorUser(ctx, 600*time.Second) // heartbeats checker timeout
+	monitorUser(ctx, 7200*time.Second) // heartbeats checker timeout
 }
 
 func monitorUser(ctx context.Context, offlineTimeout time.Duration) {
