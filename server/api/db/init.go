@@ -14,7 +14,10 @@ const (
 
 //////////////////////////////////////////////////////
 
-type DbColType string
+type (
+	DbColType string
+	DbColVal  string
+)
 
 const (
 	// Item
@@ -23,16 +26,17 @@ const (
 	Html     DbColType = "html"
 
 	// Action
-	Submit  DbColType = "submit"
-	Approve DbColType = "approve"
+	Submit    DbColType = "submit"
+	Approve   DbColType = "approve"
+	Subscribe DbColType = "subscribe"
 )
 
 //////////////////////////////////////////////////////
 
 type ItemConfig struct {
-	DbColExisting string
-	DbColText     string
-	DbColHtml     string
+	DbColExisting DbColVal
+	DbColText     DbColVal
+	DbColHtml     DbColVal
 	DirExisting   string
 	DirText       string
 	DirHtml       string
@@ -44,7 +48,7 @@ func (cfg ItemConfig) String() string {
 	return db + lk.LF + dir
 }
 
-func (cfg ItemConfig) DbColVal(col DbColType) string {
+func (cfg ItemConfig) DbColVal(col DbColType) DbColVal {
 	switch col {
 	case Existing:
 		return cfg.DbColExisting
@@ -60,21 +64,29 @@ func (cfg ItemConfig) DbColVal(col DbColType) string {
 /////////////////////////////////////////////////////////////
 
 type ActionConfig struct {
-	DbColSubmit  string
-	DbColApprove string
+	DbColSubmit    DbColVal
+	DbColApprove   DbColVal
+	DbColSubscribe DbColVal
 }
 
 func (cfg ActionConfig) String() string {
-	db := fmt.Sprintf("Action: @database: [%s]; @db-collection(submit): [%s]; @db-collection(approval): [%s]", DATABASE, cfg.DbColSubmit, cfg.DbColApprove)
+	db := fmt.Sprintf("Action: @database: [%s]; @db-collection(submit): [%s]; @db-collection(approval): [%s]; @db-collection(subscribe): [%s];",
+		DATABASE,
+		cfg.DbColSubmit,
+		cfg.DbColApprove,
+		cfg.DbColSubscribe,
+	)
 	return db
 }
 
-func (cfg ActionConfig) DbColVal(col DbColType) string {
+func (cfg ActionConfig) DbColVal(col DbColType) DbColVal {
 	switch col {
 	case Submit:
 		return cfg.DbColSubmit
 	case Approve:
 		return cfg.DbColApprove
+	case Subscribe:
+		return cfg.DbColSubscribe
 	default:
 		return ""
 	}
@@ -83,23 +95,23 @@ func (cfg ActionConfig) DbColVal(col DbColType) string {
 //////////////////////////////////////////////////////
 
 var (
-	DataDirEntity = "./data/inbound/entities"
-	CfgEntity     = ItemConfig{
+	DirEntity = "./data/inbound/entities"
+	CfgEntity = ItemConfig{
 		DbColExisting: "entities",
 		DbColText:     "entities_text",
 		DbColHtml:     "entities_html",
-		DirText:       filepath.Join(DataDirEntity, "text"),
-		DirHtml:       filepath.Join(DataDirEntity, "html"),
+		DirText:       filepath.Join(DirEntity, "text"),
+		DirHtml:       filepath.Join(DirEntity, "html"),
 		DirExisting:   "./data/renamed",
 	}
 
-	DataDirCollection = "./data/inbound/collections"
-	CfgCollection     = ItemConfig{
+	DirCollection = "./data/inbound/collections"
+	CfgCollection = ItemConfig{
 		DbColExisting: "collections",
 		DbColText:     "collections_text",
 		DbColHtml:     "collections_html",
-		DirText:       filepath.Join(DataDirCollection, "text"),
-		DirHtml:       filepath.Join(DataDirCollection, "html"),
+		DirText:       filepath.Join(DirCollection, "text"),
+		DirHtml:       filepath.Join(DirCollection, "html"),
 		DirExisting:   "./data/renamed/collections",
 	}
 
@@ -108,17 +120,23 @@ var (
 		"collection": CfgCollection,
 	}
 
+	// Computed
+	ColEntities DbColVal = "colentities"
+	Class       DbColVal = "class"
+	PathVal     DbColVal = "pathval"
+
 	//////////////////////////////////////////////////
 
 	CfgAction = ActionConfig{
-		DbColSubmit:  "act_submit",
-		DbColApprove: "act_approve",
+		DbColSubmit:    "act_submit",
+		DbColApprove:   "act_approve",
+		DbColSubscribe: "act_subscribe",
 	}
 )
 
 func init() {
 
-	lk.Log("ingested entities data store under '%v'", DataDirEntity)
+	lk.Log("ingested entities data store under '%v'", DirEntity)
 
 	gio.MustCreateDir(CfgEntity.DirText)
 	gio.MustCreateDir(CfgEntity.DirHtml)
@@ -127,7 +145,7 @@ func init() {
 
 	/////////////////////////////////////////////////////////////
 
-	lk.Log("ingested collections data store under '%v'", DataDirCollection)
+	lk.Log("ingested collections data store under '%v'", DirCollection)
 
 	gio.MustCreateDir(CfgCollection.DirText)
 	gio.MustCreateDir(CfgCollection.DirHtml)

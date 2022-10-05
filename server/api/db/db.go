@@ -11,6 +11,7 @@ import (
 
 	mh "github.com/digisan/db-helper/mongo"
 	. "github.com/digisan/go-generics/v2"
+	tc "github.com/digisan/gotk/type-check"
 	lk "github.com/digisan/logkit"
 )
 
@@ -33,7 +34,7 @@ func One[T any](cfg ItemConfig, from DbColType, itemName string, fuzzy bool) (*T
 		return nil, fmt.Errorf("from DbCol can only be [existing, text, html]")
 	}
 
-	mh.UseDbCol(DATABASE, COL)
+	mh.UseDbCol(DATABASE, string(COL))
 	found, err := mh.FindOne[T](strings.NewReader(sFilter))
 	if err != nil {
 		return nil, err
@@ -55,7 +56,7 @@ func Many[T any](cfg ItemConfig, from DbColType, itemName string) ([]*T, error) 
 		return nil, fmt.Errorf("from ItemDbCol can only be [existing, text, html]")
 	}
 
-	mh.UseDbCol(DATABASE, COL)
+	mh.UseDbCol(DATABASE, string(COL))
 	found, err := mh.Find[T](rFilter)
 	if err != nil {
 		return nil, err
@@ -83,7 +84,7 @@ func Del[T any](cfg ItemConfig, from DbColType, itemName string) (int, error) {
 		return 0, fmt.Errorf("from ItemDbCol can only be [existing, text, html]")
 	}
 
-	mh.UseDbCol(DATABASE, COL)
+	mh.UseDbCol(DATABASE, string(COL))
 	if COL == cfg.DbColHtml {
 		sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)>?%v<?"}}`, itemName)
 	}
@@ -113,9 +114,9 @@ func Clr[T any](cfg ItemConfig, from DbColType) (int, error) {
 
 //////////////////////////////////////////////////////////////
 
-func ColEntities(ColName string) ([]string, error) {
+func GetColEntities(ColName string) ([]string, error) {
 
-	mh.UseDbCol(DATABASE, "colentities") // fixed collection name
+	mh.UseDbCol(DATABASE, string(ColEntities)) // fixed collection name
 
 	whole, err := mh.FindOne[map[string]any](nil) // only one
 	if err != nil {
@@ -133,9 +134,9 @@ func ColEntities(ColName string) ([]string, error) {
 	return rtStr, nil
 }
 
-func EntClasses(EntName string) ([]string, []string, error) {
+func GetEntClasses(EntName string) ([]string, []string, error) {
 
-	mh.UseDbCol(DATABASE, "class") // fixed collection name
+	mh.UseDbCol(DATABASE, string(Class)) // fixed collection name
 
 	whole, err := mh.FindOne[map[string]any](nil) // only one
 	if err != nil {
@@ -158,7 +159,7 @@ func EntClasses(EntName string) ([]string, []string, error) {
 
 func FullTextSearch(aim string, insensitive bool) ([]string, []string, error) {
 
-	mh.UseDbCol(DATABASE, "pathval") // fixed collection name
+	mh.UseDbCol(DATABASE, string(PathVal)) // fixed collection name
 
 	var (
 		entities    = []string{}
@@ -202,20 +203,103 @@ func FullTextSearch(aim string, insensitive bool) ([]string, []string, error) {
 	return entities, collections, err
 }
 
+// from: existing, text, html
+func Exists(from DbColType, name string) (bool, error) {
+	for kind, cfg := range CfgGrp {
+		var (
+			result any = nil
+			err    error
+		)
+		switch kind {
+		case "entity":
+			result, err = One[EntityType](cfg, from, name, false)
+		case "collection":
+			result, err = One[CollectionType](cfg, from, name, false)
+		}
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return false, err
+		}
+		if !tc.IsNil(result) {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-// to: submit approve
-func RecordAction(user string, to DbColType, name, kind string) error {
+func ActionExists(user string, to DbColType) (bool, error) {
 
-	mh.UseDbCol(DATABASE, CfgAction.DbColVal(to))
+	COL := CfgAction.DbColVal(to)
+	if len(COL) == 0 {
+		return false, fmt.Errorf("[to] DbColType can only be [submit, approve, subscribe]")
+	}
+
+	mh.UseDbCol(DATABASE, string(COL))
 
 	record, err := mh.FindOneAt[ActionRecord]("User", user)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
-		return err
+		return false, err
+	}
+	if record == nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func ActionRecordExists(user string, to DbColType, name string) (bool, error) {
+
+	ok, err := ActionExists(user, to)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return false, err
+	}
+	if !ok {
+		return false, nil
 	}
 
-	if record == nil {
+	record, _ := mh.FindOneAt[ActionRecord]("User", user)
+	for _, item := range record.Did {
+		if item.Name == name {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// to: [submit approve subscribe]
+func RecordAction(user string, to DbColType, name, kind string) (bool, error) {
+
+	// check item exists under this action
+	ok, err := ActionRecordExists(user, to, name)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return false, err
+	}
+	// already exists, do nothing
+	if ok {
+		return false, nil
+	}
+
+	// check action exists
+	ok, err = ActionExists(user, to)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return false, err
+	}
+	if ok { // action exists, append item
+
+		record, _ := mh.FindOneAt[ActionRecord]("User", user)
+		record.Did = append(record.Did, DidItem{Name: name, Kind: kind, Timestamp: time.Now()})
+		if _, _, err = mh.Upsert(bytes.NewReader(record.Marshal()), "User", user); err != nil {
+			lk.WarnOnErr("%v", err)
+			return false, err
+		}
+
+	} else { // action doesn't exist, create new
+
 		r := ActionRecord{
 			User:   user,
 			Action: string(to),
@@ -225,20 +309,42 @@ func RecordAction(user string, to DbColType, name, kind string) error {
 				Timestamp: time.Now(),
 			}},
 		}
-		_, _, err := mh.Upsert(bytes.NewReader(r.Marshal()), "User", user)
-		if err != nil {
+		if _, _, err := mh.Upsert(bytes.NewReader(r.Marshal()), "User", user); err != nil {
 			lk.WarnOnErr("%v", err)
-			return err
-		}
-
-	} else {
-
-		record.Did = append(record.Did, DidItem{Name: name, Kind: kind, Timestamp: time.Now()})
-		_, _, err := mh.Upsert(bytes.NewReader(record.Marshal()), "User", user)
-		if err != nil {
-			lk.WarnOnErr("%v", err)
-			return err
+			return false, err
 		}
 	}
-	return nil
+	return true, nil
+}
+
+// to: [submit approve subscribe]
+func RemoveAction(user string, to DbColType, name string) (bool, error) {
+
+	// check action exists
+	ok, err := ActionExists(user, to)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return false, err
+	}
+	if !ok { // action doesn't exist, do nothing
+		return false, nil
+	}
+
+	// check item exists under this action
+	ok, err = ActionRecordExists(user, to, name)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return false, err
+	}
+	if !ok { // action item doesn't exist, do nothing
+		return false, nil
+	}
+
+	record, _ := mh.FindOneAt[ActionRecord]("User", user)
+	record.Did = Filter(record.Did, func(i int, e DidItem) bool { return e.Name != name })
+	if _, _, err = mh.Upsert(bytes.NewReader(record.Marshal()), "User", user); err != nil {
+		lk.WarnOnErr("%v", err)
+		return false, err
+	}
+	return true, nil
 }

@@ -26,7 +26,7 @@ var (
 	mListCache = make(map[string][]string)
 )
 
-// @Title   insert or update one dictionary item
+// @Title   submit one dictionary item
 // @Summary insert or update one entity or collection data by json payload
 // @Description
 // @Tags    Dictionary
@@ -108,7 +108,7 @@ func Upsert(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "item kind can only be [entity collection]")
 	}
 
-	mh.UseDbCol(db.DATABASE, IF(flagHtml, cfg.DbColHtml, cfg.DbColText))
+	mh.UseDbCol(db.DATABASE, string(IF(flagHtml, cfg.DbColHtml, cfg.DbColText)))
 
 	//
 	// ingest inbound data into db(text/html), if entity already exists, replace old one
@@ -137,7 +137,7 @@ func Upsert(c echo.Context) error {
 	// record item(text) into author db collection
 	//
 	if !flagHtml {
-		if err := db.RecordAction(author, db.Submit, name, inKind); err != nil {
+		if _, err := db.RecordAction(author, db.Submit, name, inKind); err != nil {
 			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
@@ -296,6 +296,32 @@ func One(c echo.Context) error {
 	return c.String(http.StatusNotFound, fmt.Sprintf(`[%v] is not existing`, name))
 }
 
+// @Title   check item existing status
+// @Summary check whether one item exists according to its 'Entity' name
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   name query string true "Entity name"
+// @Param   dbcol query string true  "from which db collection? [existing, text, html]"
+// @Success 200 "OK - got successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/pub/exists [get]
+func Exists(c echo.Context) error {
+
+	lk.Log("Enter: Get Exists")
+
+	var (
+		name  = c.QueryParam("name")
+		dbcol = c.QueryParam("dbcol") // existing, text, html
+	)
+	ok, err := db.Exists(db.DbColType(dbcol), name)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, ok)
+}
+
 // @Title   delete one item
 // @Summary delete one entity or collection by its 'Entity' name
 // @Description
@@ -393,7 +419,7 @@ func Clear(c echo.Context) error {
 // @Failure 404 "Fail - neither 'entity' nor 'collection'"
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/pub/kind [get]
-func CheckItemKind(c echo.Context) error {
+func ItemKind(c echo.Context) error {
 
 	lk.Log("Enter: CheckItemKind")
 
@@ -439,7 +465,7 @@ func ColEntities(c echo.Context) error {
 	var (
 		name = c.QueryParam("colname")
 	)
-	rt, err := db.ColEntities(name) // only use cfg's dbName, colName is fixed.
+	rt, err := db.GetColEntities(name) // only use cfg's dbName, colName is fixed.
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -464,7 +490,7 @@ func EntClasses(c echo.Context) error {
 	var (
 		name = c.QueryParam("entname")
 	)
-	derived, children, err := db.EntClasses(name) // only use cfg's dbName, colName is fixed.
+	derived, children, err := db.GetEntClasses(name) // only use cfg's dbName, colName is fixed.
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -554,10 +580,9 @@ func Approve(c echo.Context) error {
 	//
 	// 1. delete from inbound text db collection. KEEP html for future format query
 	//
-	mh.UseDbCol(db.DATABASE, cfg.DbColText)
+	mh.UseDbCol(db.DATABASE, string(cfg.DbColText))
 
-	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, name)
-	n, _, err := mh.DeleteOne[any](strings.NewReader(sFilter))
+	n, _, err := mh.DeleteOneAt[any]("Entity", name)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -570,7 +595,7 @@ func Approve(c echo.Context) error {
 	//
 	// 2. record into existing db collection
 	//
-	mh.UseDbCol(db.DATABASE, cfg.DbColExisting)
+	mh.UseDbCol(db.DATABASE, string(cfg.DbColExisting))
 
 	var (
 		from = filepath.Join(cfg.DirText, name+".json")
@@ -599,10 +624,86 @@ func Approve(c echo.Context) error {
 	//
 	// 4. record into approver db collection
 	//
-	if err := db.RecordAction(approver, db.Approve, name, kind); err != nil {
+	if _, err := db.RecordAction(approver, db.Approve, name, kind); err != nil {
 		lk.WarnOnErr("%v", err)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is approved by [%v]", name, approver))
+}
+
+// @Title   subscribe one dictionary item
+// @Summary subscribe one dictionary item
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   name query string  true "entity/collection 'Entity' name for approval"
+// @Param   kind query string  true "item type, can only be [entity collection]"
+// @Param   flag query boolean true "indicator for subscribe(true) / unsubscribe(false)"
+// @Success 200 "OK - subscribe successfully"
+// @Failure 400 "Fail - invalid parameters or request body"
+// @Failure 404 "Fail - couldn't find item to subscribe"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/auth/subscribe [put]
+// @Security ApiKeyAuth
+func Subscribe(c echo.Context) error {
+
+	lk.Log("Enter: Put Subscribe")
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)     //
+		claims  = userTkn.Claims.(*u.UserClaims) //
+		user    = claims.UName                   // user
+		name    = c.QueryParam("name")           // item name
+		kind    = c.QueryParam("kind")           // item kind
+		flagstr = c.QueryParam("flag")           // subscribe / unsubscribe
+	)
+
+	// validate 'kind'
+	if _, ok := db.CfgGrp[kind]; !ok {
+		return c.String(http.StatusBadRequest, "kind can only be [entity collection]")
+	}
+
+	// validate 'flag'
+	flag, err := strconv.ParseBool(flagstr)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "flag can only be boolean, true for subscribe, false for unsubscribe")
+	}
+
+	// validate 'name'
+	ok, err := db.Exists("existing", name)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !ok {
+		return c.String(http.StatusNotFound, fmt.Sprintf("[%v] is not existing, cannot be subscribed", name))
+	}
+
+	if flag {
+
+		// subscribe action
+		did, err := db.RecordAction(user, db.Subscribe, name, kind)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		if did {
+			return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is subscribed by [%v] now", name, user))
+		}
+		return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is already subscribed by [%v], did nothing", name, user))
+
+	} else {
+
+		// unsubscribe action
+		did, err := db.RemoveAction(user, db.Subscribe, name)
+		if err != nil {
+			lk.WarnOnErr("%v", err)
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		if did {
+			return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is unsubscribed by [%v] now", name, user))
+		}
+		return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is not subscribed by [%v], did nothing", name, user))
+	}
 }

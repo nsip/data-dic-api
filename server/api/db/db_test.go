@@ -11,7 +11,7 @@ func TestDel(t *testing.T) {
 }
 
 func TestColEntities(t *testing.T) {
-	entities, err := ColEntities("NAPLAN Student Registration")
+	entities, err := GetColEntities("NAPLAN Student Registration")
 	fmt.Println(err)
 	for _, en := range entities {
 		fmt.Println(en)
@@ -19,7 +19,7 @@ func TestColEntities(t *testing.T) {
 }
 
 func TestEntClasses(t *testing.T) {
-	derived, children, err := EntClasses("Staff")
+	derived, children, err := GetEntClasses("Staff")
 	fmt.Println(err)
 	fmt.Println("-----")
 	for _, en := range derived {

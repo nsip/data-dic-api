@@ -130,6 +130,42 @@ paths:
       summary: delete one entity or collection by its 'Entity' name
       tags:
       - Dictionary
+  /api/dictionary/auth/subscribe:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: entity/collection 'Entity' name for approval
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: item type, can only be [entity collection]
+        in: query
+        name: kind
+        required: true
+        type: string
+      - description: indicator for subscribe(true) / unsubscribe(false)
+        in: query
+        name: flag
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - subscribe successfully
+        "400":
+          description: Fail - invalid parameters or request body
+        "404":
+          description: Fail - couldn't find item to subscribe
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: subscribe one dictionary item
+      tags:
+      - Dictionary
   /api/dictionary/auth/upsert:
     post:
       consumes:
@@ -194,6 +230,31 @@ paths:
         "500":
           description: Fail - internal error
       summary: get class info (derived path & children) of an entity
+      tags:
+      - Dictionary
+  /api/dictionary/pub/exists:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Entity name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: from which db collection? [existing, text, html]
+        in: query
+        name: dbcol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - got successfully
+        "500":
+          description: Fail - internal error
+      summary: check whether one item exists according to its 'Entity' name
       tags:
       - Dictionary
   /api/dictionary/pub/items/{kind}:

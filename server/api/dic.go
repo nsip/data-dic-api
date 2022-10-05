@@ -17,7 +17,8 @@ func DicPubHandler(r *echo.Group) {
 		"/colentities": dic.ColEntities,
 		"/entclasses":  dic.EntClasses,
 		"/search":      dic.FullTextSearch,
-		"/kind":        dic.CheckItemKind,
+		"/kind":        dic.ItemKind,
+		"/exists":      dic.Exists,
 	}
 	var mPOST = map[string]echo.HandlerFunc{}
 	var mPUT = map[string]echo.HandlerFunc{}
@@ -67,7 +68,8 @@ func DicAuthHandler(r *echo.Group) {
 		"/upsert": dic.Upsert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{
-		"/approve": dic.Approve,
+		"/approve":   dic.Approve,
+		"/subscribe": dic.Subscribe,
 	}
 	var mDELETE = map[string]echo.HandlerFunc{
 		"/one":         dic.Delete,

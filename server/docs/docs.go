@@ -213,6 +213,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/dictionary/auth/subscribe": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "subscribe one dictionary item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "entity/collection 'Entity' name for approval",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "item type, can only be [entity collection]",
+                        "name": "kind",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "indicator for subscribe(true) / unsubscribe(false)",
+                        "name": "flag",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - subscribe successfully"
+                    },
+                    "400": {
+                        "description": "Fail - invalid parameters or request body"
+                    },
+                    "404": {
+                        "description": "Fail - couldn't find item to subscribe"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/auth/upsert": {
             "post": {
                 "security": [
@@ -310,6 +366,44 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK - got entity class info successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
+        "/api/dictionary/pub/exists": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "check whether one item exists according to its 'Entity' name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Entity name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - got successfully"
                     },
                     "500": {
                         "description": "Fail - internal error"
