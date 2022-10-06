@@ -229,9 +229,9 @@ func Exists(from DbColType, name string) (bool, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func ActionExists(user string, to DbColType) (bool, error) {
+func ActionExists(user string, from DbColType) (bool, error) {
 
-	COL := CfgAction.DbColVal(to)
+	COL := CfgAction.DbColVal(from)
 	if len(COL) == 0 {
 		return false, fmt.Errorf("[to] DbColType can only be [submit, approve, subscribe]")
 	}
@@ -249,9 +249,9 @@ func ActionExists(user string, to DbColType) (bool, error) {
 	return true, nil
 }
 
-func ActionRecordExists(user string, to DbColType, name string) (bool, error) {
+func ActionRecordExists(user string, from DbColType, name string) (bool, error) {
 
-	ok, err := ActionExists(user, to)
+	ok, err := ActionExists(user, from)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return false, err
@@ -318,10 +318,10 @@ func RecordAction(user string, to DbColType, name, kind string) (bool, error) {
 }
 
 // to: [submit approve subscribe]
-func RemoveAction(user string, to DbColType, name string) (bool, error) {
+func RemoveAction(user string, from DbColType, name string) (bool, error) {
 
 	// check action exists
-	ok, err := ActionExists(user, to)
+	ok, err := ActionExists(user, from)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return false, err
@@ -331,7 +331,7 @@ func RemoveAction(user string, to DbColType, name string) (bool, error) {
 	}
 
 	// check item exists under this action
-	ok, err = ActionRecordExists(user, to, name)
+	ok, err = ActionRecordExists(user, from, name)
 	if err != nil {
 		lk.WarnOnErr("%v", err)
 		return false, err
@@ -347,4 +347,23 @@ func RemoveAction(user string, to DbColType, name string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func ListActionRecord(user string, from DbColType) ([]string, error) {
+
+	// check action exists
+	ok, err := ActionExists(user, from)
+	if err != nil {
+		lk.WarnOnErr("%v", err)
+		return nil, err
+	}
+	if !ok { // action doesn't exist, return empty
+		return []string{}, nil
+	}
+
+	record, err := mh.FindOneAt[ActionRecord]("User", user)
+	if err != nil {
+		return nil, err
+	}
+	return FilterMap(record.Did, nil, func(i int, e DidItem) string { return e.Name }), nil
 }

@@ -162,6 +162,42 @@
                 }
             }
         },
+        "/api/dictionary/auth/list/{action}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "list recorded action items from [submit, approve, subscribe]",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "which action what to list its item record",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - get list successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/auth/one": {
             "delete": {
                 "security": [

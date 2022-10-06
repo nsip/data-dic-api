@@ -103,6 +103,28 @@ paths:
       summary: delete all entities or collections (dangerous)
       tags:
       - Dictionary
+  /api/dictionary/auth/list/{action}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: which action what to list its item record
+        in: path
+        name: action
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - get list successfully
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: list recorded action items from [submit, approve, subscribe]
+      tags:
+      - Dictionary
   /api/dictionary/auth/one:
     delete:
       consumes:

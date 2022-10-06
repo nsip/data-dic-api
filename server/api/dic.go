@@ -63,7 +63,9 @@ func DicPubHandler(r *echo.Group) {
 // "/api/dictionary/auth"
 func DicAuthHandler(r *echo.Group) {
 
-	var mGET = map[string]echo.HandlerFunc{}
+	var mGET = map[string]echo.HandlerFunc{
+		"/list/:action": dic.ListAction,
+	}
 	var mPOST = map[string]echo.HandlerFunc{
 		"/upsert": dic.Upsert,
 	}

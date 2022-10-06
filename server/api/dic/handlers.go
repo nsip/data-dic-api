@@ -707,3 +707,32 @@ func Subscribe(c echo.Context) error {
 		return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is not subscribed by [%v], did nothing", name, user))
 	}
 }
+
+// @Title   list action items
+// @Summary list recorded action items from [submit, approve, subscribe]
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   action path string true "which action what to list its item record"
+// @Success 200 "OK - get list successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/auth/list/{action} [get]
+// @Security ApiKeyAuth
+func ListAction(c echo.Context) error {
+
+	lk.Log("Enter: Get ListAction")
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)     //
+		claims  = userTkn.Claims.(*u.UserClaims) //
+		user    = claims.UName                   // user
+		action  = c.Param("action")              // action: submit, approve, subscribe
+	)
+
+	ls, err := db.ListActionRecord(user, db.DbColType(action))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, ls)
+}
