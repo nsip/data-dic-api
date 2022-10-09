@@ -119,6 +119,49 @@
                 }
             }
         },
+        "/api/dictionary/auth/check/{action}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Dictionary"
+                ],
+                "summary": "check recorded action item existing status from [submit, approve, subscribe]",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "which action what to list its item record",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "entity/collection 'Entity' name for checking existing status",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - get existing status successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/dictionary/auth/clear/{kind}": {
             "delete": {
                 "security": [
@@ -257,7 +300,7 @@
                 "tags": [
                     "Dictionary"
                 ],
-                "summary": "subscribe one dictionary item",
+                "summary": "toggle subscribe one dictionary item",
                 "parameters": [
                     {
                         "type": "string",
@@ -272,18 +315,11 @@
                         "name": "kind",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "indicator for subscribe(true) / unsubscribe(false)",
-                        "name": "flag",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK - subscribe successfully"
+                        "description": "OK - subscribe/unsubscribe successfully. true: subscribed now; false: unsubscribed now"
                     },
                     "400": {
                         "description": "Fail - invalid parameters or request body"

@@ -64,14 +64,15 @@ func DicPubHandler(r *echo.Group) {
 func DicAuthHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
-		"/list/:action": dic.ListAction,
+		"/list/:action":  dic.ListAction,
+		"/check/:action": dic.ActionRecordExists,
 	}
 	var mPOST = map[string]echo.HandlerFunc{
 		"/upsert": dic.Upsert,
 	}
 	var mPUT = map[string]echo.HandlerFunc{
 		"/approve":   dic.Approve,
-		"/subscribe": dic.Subscribe,
+		"/subscribe": dic.ToggleSubscribe,
 	}
 	var mDELETE = map[string]echo.HandlerFunc{
 		"/one":         dic.Delete,

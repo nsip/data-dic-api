@@ -632,22 +632,21 @@ func Approve(c echo.Context) error {
 	return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is approved by [%v]", name, approver))
 }
 
-// @Title   subscribe one dictionary item
-// @Summary subscribe one dictionary item
+// @Title   toggle subscribe one dictionary item
+// @Summary toggle subscribe one dictionary item
 // @Description
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   name query string  true "entity/collection 'Entity' name for approval"
-// @Param   kind query string  true "item type, can only be [entity collection]"
-// @Param   flag query boolean true "indicator for subscribe(true) / unsubscribe(false)"
-// @Success 200 "OK - subscribe successfully"
+// @Param   name query string true "entity/collection 'Entity' name for approval"
+// @Param   kind query string true "item type, can only be [entity collection]"
+// @Success 200 "OK - subscribe/unsubscribe successfully. true: subscribed now; false: unsubscribed now"
 // @Failure 400 "Fail - invalid parameters or request body"
 // @Failure 404 "Fail - couldn't find item to subscribe"
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/auth/subscribe [put]
 // @Security ApiKeyAuth
-func Subscribe(c echo.Context) error {
+func ToggleSubscribe(c echo.Context) error {
 
 	lk.Log("Enter: Put Subscribe")
 
@@ -657,18 +656,11 @@ func Subscribe(c echo.Context) error {
 		user    = claims.UName                   // user
 		name    = c.QueryParam("name")           // item name
 		kind    = c.QueryParam("kind")           // item kind
-		flagstr = c.QueryParam("flag")           // subscribe / unsubscribe
 	)
 
 	// validate 'kind'
 	if _, ok := db.CfgGrp[kind]; !ok {
-		return c.String(http.StatusBadRequest, "kind can only be [entity collection]")
-	}
-
-	// validate 'flag'
-	flag, err := strconv.ParseBool(flagstr)
-	if err != nil {
-		return c.String(http.StatusBadRequest, "flag can only be boolean, true for subscribe, false for unsubscribe")
+		return c.String(http.StatusBadRequest, "[kind] can only be [entity collection]")
 	}
 
 	// validate 'name'
@@ -677,34 +669,34 @@ func Subscribe(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if !ok {
-		return c.String(http.StatusNotFound, fmt.Sprintf("[%v] is not existing, cannot be subscribed", name))
+		return c.String(http.StatusNotFound, fmt.Sprintf("[%v] is not existing, cannot subscribe", name))
 	}
 
-	if flag {
+	// check subscription status
+	ls, err := db.ListActionRecord(user, db.DbColType("subscribe"))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	if NotIn(name, ls...) {
 
 		// subscribe action
-		did, err := db.RecordAction(user, db.Subscribe, name, kind)
+		_, err := db.RecordAction(user, db.Subscribe, name, kind)
 		if err != nil {
 			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if did {
-			return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is subscribed by [%v] now", name, user))
-		}
-		return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is already subscribed by [%v], did nothing", name, user))
+		return c.JSON(http.StatusOK, true)
 
 	} else {
 
 		// unsubscribe action
-		did, err := db.RemoveAction(user, db.Subscribe, name)
+		_, err := db.RemoveAction(user, db.Subscribe, name)
 		if err != nil {
 			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if did {
-			return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is unsubscribed by [%v] now", name, user))
-		}
-		return c.JSON(http.StatusOK, fmt.Sprintf("[%v] is not subscribed by [%v], did nothing", name, user))
+		return c.JSON(http.StatusOK, false)
 	}
 }
 
@@ -735,4 +727,35 @@ func ListAction(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, ls)
+}
+
+// @Title   check action item is existing
+// @Summary check recorded action item existing status from [submit, approve, subscribe]
+// @Description
+// @Tags    Dictionary
+// @Accept  json
+// @Produce json
+// @Param   action path  string true "which action what to list its item record"
+// @Param   name   query string true "entity/collection 'Entity' name for checking existing status"
+// @Success 200 "OK - get existing status successfully"
+// @Failure 500 "Fail - internal error"
+// @Router /api/dictionary/auth/check/{action} [get]
+// @Security ApiKeyAuth
+func ActionRecordExists(c echo.Context) error {
+
+	lk.Log("Enter: Get ActionRecordExists")
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)     //
+		claims  = userTkn.Claims.(*u.UserClaims) //
+		user    = claims.UName                   // user
+		action  = c.Param("action")              // action: submit, approve, subscribe
+		name    = c.QueryParam("name")           // item name
+	)
+
+	ls, err := db.ListActionRecord(user, db.DbColType(action))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, In(name, ls...))
 }

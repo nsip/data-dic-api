@@ -76,6 +76,33 @@ paths:
       summary: approve one dictionary candidate item
       tags:
       - Dictionary
+  /api/dictionary/auth/check/{action}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: which action what to list its item record
+        in: path
+        name: action
+        required: true
+        type: string
+      - description: entity/collection 'Entity' name for checking existing status
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - get existing status successfully
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: check recorded action item existing status from [submit, approve, subscribe]
+      tags:
+      - Dictionary
   /api/dictionary/auth/clear/{kind}:
     delete:
       consumes:
@@ -167,16 +194,12 @@ paths:
         name: kind
         required: true
         type: string
-      - description: indicator for subscribe(true) / unsubscribe(false)
-        in: query
-        name: flag
-        required: true
-        type: boolean
       produces:
       - application/json
       responses:
         "200":
-          description: OK - subscribe successfully
+          description: 'OK - subscribe/unsubscribe successfully. true: subscribed
+            now; false: unsubscribed now'
         "400":
           description: Fail - invalid parameters or request body
         "404":
@@ -185,7 +208,7 @@ paths:
           description: Fail - internal error
       security:
       - ApiKeyAuth: []
-      summary: subscribe one dictionary item
+      summary: toggle subscribe one dictionary item
       tags:
       - Dictionary
   /api/dictionary/auth/upsert:
