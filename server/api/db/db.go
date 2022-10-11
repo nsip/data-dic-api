@@ -43,10 +43,10 @@ func One[T any](cfg ItemConfig, from DbColType, itemName string, fuzzy bool) (*T
 }
 
 // from: existing, text, html
-func Many[T any](cfg ItemConfig, from DbColType, itemName string) ([]*T, error) {
+func Many[T any](cfg ItemConfig, from DbColType, filterName string) ([]*T, error) {
 	var rFilter io.Reader = nil // NOT using "*strings.Reader = nil" as nil interface
-	if len(itemName) > 0 {
-		sFilter := fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, itemName)
+	if len(filterName) > 0 {
+		sFilter := fmt.Sprintf(`{"Entity": {"$regex": "(?i)%v"}}`, filterName)
 		lk.Log("sFilter %v", sFilter)
 		rFilter = strings.NewReader(sFilter)
 	}
@@ -65,8 +65,8 @@ func Many[T any](cfg ItemConfig, from DbColType, itemName string) ([]*T, error) 
 }
 
 // from: existing, text, html
-func ListMany[T any](cfg ItemConfig, from DbColType, itemName string) ([]string, error) {
-	found, err := Many[T](cfg, from, itemName)
+func ListMany[T any](cfg ItemConfig, from DbColType, filterName string) ([]string, error) {
+	found, err := Many[T](cfg, from, filterName)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package dic
 
 import (
+	"sync"
 	"time"
 
 	lk "github.com/digisan/logkit"
@@ -12,7 +13,20 @@ var (
 	tkIngestAll = time.NewTicker(1 * time.Hour) // re ingest all to restructure
 )
 
+var (
+	mtx = sync.Mutex{}
+	//                    dbcol      kind     names
+	mListCache = make(map[string]map[string][]string)
+)
+
 func init() {
+
+	//
+	mListCache["existing"] = make(map[string][]string)
+	mListCache["text"] = make(map[string][]string)
+	mListCache["html"] = make(map[string][]string)
+
+	//
 	go func() {
 		for {
 			select {

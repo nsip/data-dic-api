@@ -22,10 +22,6 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var (
-	mListCache = make(map[string][]string)
-)
-
 // @Title   submit one dictionary item
 // @Summary insert or update one entity or collection data by json payload
 // @Description
@@ -203,6 +199,8 @@ func Items(c echo.Context) error {
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/pub/list/{kind} [get]
 func List(c echo.Context) error {
+	mtx.Lock()
+	defer mtx.Unlock()
 
 	lk.Log("Enter: Get List")
 
@@ -233,7 +231,7 @@ func List(c echo.Context) error {
 	}
 
 	// cache list
-	mListCache[kind] = names
+	mListCache[dbcol][kind] = names
 
 	return c.JSON(http.StatusOK, names)
 }
@@ -420,6 +418,8 @@ func Clear(c echo.Context) error {
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/pub/kind [get]
 func ItemKind(c echo.Context) error {
+	mtx.Lock()
+	defer mtx.Unlock()
 
 	lk.Log("Enter: CheckItemKind")
 
@@ -427,12 +427,12 @@ func ItemKind(c echo.Context) error {
 		name = c.QueryParam("name")
 	)
 
-	if len(mListCache) == 0 {
+	if len(mListCache["existing"]) == 0 {
 		return c.String(http.StatusInternalServerError, "list cache hasn't been loaded")
 	}
 
-	lsEntity, okEntity := mListCache["entity"]
-	lsCollection, okCollection := mListCache["collection"]
+	lsEntity, okEntity := mListCache["existing"]["entity"]
+	lsCollection, okCollection := mListCache["existing"]["collection"]
 
 	switch {
 	case okEntity && strs.IsIn(true, true, name, lsEntity...):
@@ -514,6 +514,8 @@ func EntClasses(c echo.Context) error {
 // @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/pub/search [get]
 func FullTextSearch(c echo.Context) error {
+	mtx.Lock()
+	defer mtx.Unlock()
 
 	lk.Log("Enter: FullTextSearch")
 
@@ -527,7 +529,7 @@ func FullTextSearch(c echo.Context) error {
 		return c.JSON(http.StatusOK, struct {
 			Entities    []string
 			Collections []string
-		}{mListCache["entity"], mListCache["collection"]})
+		}{mListCache["existing"]["entity"], mListCache["existing"]["collection"]})
 	}
 
 	// aim is not empty, do real full text search
