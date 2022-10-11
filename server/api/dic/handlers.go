@@ -719,7 +719,7 @@ func ListAction(c echo.Context) error {
 		userTkn = c.Get("user").(*jwt.Token)     //
 		claims  = userTkn.Claims.(*u.UserClaims) //
 		user    = claims.UName                   // user
-		action  = c.Param("action")              // action: submit, approve, subscribe
+		action  = c.Param("action")              // action type: submit, approve, subscribe
 	)
 
 	ls, err := db.ListActionRecord(user, db.DbColType(action))

@@ -10,6 +10,38 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
+  /api/admin/user/action-list/{action}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user registered unique name
+        in: query
+        name: uname
+        required: true
+        type: string
+      - description: which action type [submit, approve, subscribe] record want to
+          list
+        in: path
+        name: action
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "401":
+          description: Fail - unauthorized error
+        "403":
+          description: Fail - forbidden error
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: list user's action record
+      tags:
+      - Admin
   /api/admin/user/list/{field}:
     get:
       consumes:
@@ -30,6 +62,7 @@ paths:
       - description: which user's field want to list
         in: path
         name: field
+        required: true
         type: string
       produces:
       - application/json
@@ -38,6 +71,8 @@ paths:
           description: OK - list successfully
         "401":
           description: Fail - unauthorized error
+        "403":
+          description: Fail - forbidden error
         "500":
           description: Fail - internal error
       security:

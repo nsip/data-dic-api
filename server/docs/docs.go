@@ -22,6 +22,55 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/admin/user/action-list/{action}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "list user's action record",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user registered unique name",
+                        "name": "uname",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "which action type [submit, approve, subscribe] record want to list",
+                        "name": "action",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - list successfully"
+                    },
+                    "401": {
+                        "description": "Fail - unauthorized error"
+                    },
+                    "403": {
+                        "description": "Fail - forbidden error"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/admin/user/list/{field}": {
             "get": {
                 "security": [
@@ -62,7 +111,8 @@ const docTemplate = `{
                         "type": "string",
                         "description": "which user's field want to list",
                         "name": "field",
-                        "in": "path"
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -71,6 +121,9 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Fail - unauthorized error"
+                    },
+                    "403": {
+                        "description": "Fail - forbidden error"
                     },
                     "500": {
                         "description": "Fail - internal error"

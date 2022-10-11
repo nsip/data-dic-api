@@ -10,6 +10,7 @@ import (
 	u "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
+	"github.com/nsip/data-dic-api/server/api/db"
 )
 
 // @Title list users' info
@@ -21,26 +22,28 @@ import (
 // @Param   uname  query string false "user filter with uname wildcard(*)"
 // @Param   name   query string false "user filter with name wildcard(*)"
 // @Param   active query string false "user filter with active status"
-// @Param   field  path  string false "which user's field want to list"
+// @Param   field  path  string true  "which user's field want to list"
 // @Success 200 "OK - list successfully"
 // @Failure 401 "Fail - unauthorized error"
+// @Failure 403 "Fail - forbidden error"
 // @Failure 500 "Fail - internal error"
 // @Router /api/admin/user/list/{field} [get]
 // @Security ApiKeyAuth
 func ListUser(c echo.Context) error {
+
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)
-		uname   = claims.UName
+		admin   = claims.UName
 	)
 
-	user, ok, err := u.LoadActiveUser(uname)
+	user, ok, err := u.LoadActiveUser(admin)
 
 	switch {
 	case err != nil:
 		return c.String(http.StatusInternalServerError, err.Error())
 	case !ok:
-		return c.String(http.StatusInternalServerError, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
+		return c.String(http.StatusForbidden, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
 	}
 
 	// if user.MemLevel != 3 {
@@ -93,4 +96,53 @@ func ListUser(c echo.Context) error {
 		rt = users
 	}
 	return c.JSON(http.StatusOK, rt)
+}
+
+// @Title list user's action record
+// @Summary list user's action record
+// @Description
+// @Tags    Admin
+// @Accept  json
+// @Produce json
+// @Param   uname  query string true "user registered unique name"
+// @Param   action path  string true "which action type [submit, approve, subscribe] record want to list"
+// @Success 200 "OK - list successfully"
+// @Failure 401 "Fail - unauthorized error"
+// @Failure 403 "Fail - forbidden error"
+// @Failure 500 "Fail - internal error"
+// @Router /api/admin/user/action-list/{action} [get]
+// @Security ApiKeyAuth
+func ListUserAction(c echo.Context) error {
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)
+		claims  = userTkn.Claims.(*u.UserClaims)
+		admin   = claims.UName
+	)
+
+	user, ok, err := u.LoadActiveUser(admin)
+
+	switch {
+	case err != nil:
+		return c.String(http.StatusInternalServerError, err.Error())
+	case !ok:
+		return c.String(http.StatusForbidden, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
+	}
+
+	// if user.MemLevel != 3 {
+	// 	return c.String(http.StatusUnauthorized, "failed, you are not authorized to this api")
+	// }
+
+	// --- //
+
+	var (
+		uname  = c.QueryParam("uname") // other uname
+		action = c.Param("action")     // action type: submit, approve, subscribe
+	)
+
+	ls, err := db.ListActionRecord(uname, db.DbColType(action))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, ls)
 }
