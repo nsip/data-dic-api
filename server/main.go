@@ -28,6 +28,7 @@ var (
 )
 
 func init() {
+	lk.Log("starting...main")
 	lk.WarnDetail(false)
 }
 

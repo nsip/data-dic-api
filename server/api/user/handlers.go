@@ -27,9 +27,9 @@ var (
 // @Tags    User
 // @Accept  multipart/form-data
 // @Produce json
-// @Param   uname   formData   string  true  "unique user name"
-// @Param   email   formData   string  true  "user's email" Format(email)
-// @Param   pwd     formData   string  true  "user's password"
+// @Param   uname formData string true "unique user name"
+// @Param   email formData string true "user's email" Format(email)
+// @Param   pwd   formData string true "user's password"
 // @Success 200 "OK - then waiting for verification code"
 // @Failure 400 "Fail - invalid registry fields"
 // @Failure 500 "Fail - internal error"

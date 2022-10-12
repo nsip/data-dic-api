@@ -20,6 +20,8 @@ var (
 
 func init() {
 
+	lk.Log("starting...user")
+
 	// set user db dir, activate ***[UserDB]***
 	u.InitDB("./data/db-user")
 

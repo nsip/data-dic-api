@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/digisan/db-helper v0.0.17
+	github.com/digisan/go-config v0.0.8
 	github.com/digisan/go-generics v0.2.3
 	github.com/digisan/gotk v0.1.26
 	github.com/digisan/json-tool v0.1.6
@@ -11,6 +12,7 @@ require (
 	github.com/digisan/user-mgr v0.3.8
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.9.0
+	github.com/mailgun/mailgun-go/v4 v4.8.1
 	github.com/postfinance/single v0.0.2
 	github.com/swaggo/echo-swagger v1.3.5
 	github.com/swaggo/swag v1.8.6
@@ -27,7 +29,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/dgraph-io/badger/v3 v3.2103.2 // indirect
-	github.com/dgraph-io/ristretto v0.1.0 // indirect
+	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
@@ -42,8 +44,10 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/flatbuffers v22.9.29+incompatible // indirect
 	github.com/gookit/color v1.5.2 // indirect
+	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/jtguibas/cinema v0.0.0-20200208054232-ca271f28a020 // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
@@ -51,6 +55,8 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/montanaflynn/stats v0.6.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
@@ -68,7 +74,7 @@ require (
 	golang.org/x/net v0.0.0-20221004154528-8021a29435af // indirect
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
 	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.3.8 // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect
 	golang.org/x/tools v0.1.12 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

@@ -15,7 +15,10 @@ func AdminHandler(r *echo.Group) {
 		"/user/action-list/:action": ad.ListUserAction,
 	}
 
-	var mPOST = map[string]echo.HandlerFunc{}
+	var mPOST = map[string]echo.HandlerFunc{
+		"/email": ad.SendEmail,
+	}
+
 	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{}
 	var mPATCH = map[string]echo.HandlerFunc{}

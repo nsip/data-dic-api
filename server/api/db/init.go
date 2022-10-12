@@ -136,6 +136,8 @@ var (
 
 func init() {
 
+	lk.Log("starting...db")
+
 	lk.Log("ingested entities data store under '%v'", DirEntity)
 
 	gio.MustCreateDir(CfgEntity.DirText)

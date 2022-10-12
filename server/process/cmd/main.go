@@ -16,6 +16,7 @@ import (
 )
 
 func init() {
+	lk.Log("starting...process cmd")
 	lk.Log2F(true, "./process.log")
 	lk.WarnDetail(false)
 }

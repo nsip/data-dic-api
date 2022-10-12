@@ -36,8 +36,11 @@ cd -
 
 #######################################################################################
 
-# copy existing entity json files to current folder
+# copy existing entity & collection json files to current folder
 cp -rf ../data $OUTPATH_LINUX
+
+# copy email config file to current folder
+cp -rf ./email/email-config.json $OUTPATH_LINUX
 
 #######################################################################################
 

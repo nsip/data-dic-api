@@ -10,6 +10,41 @@ info:
   title: National Education Data Dictionary API
   version: "1.0"
 paths:
+  /api/admin/email:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: unique user name
+        in: formData
+        name: uname
+        required: true
+        type: string
+      - description: subject for email
+        in: formData
+        name: subject
+        required: true
+        type: string
+      - description: body for email
+        in: formData
+        name: body
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "401":
+          description: Fail - unauthorized error
+        "403":
+          description: Fail - forbidden error
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Admin
   /api/admin/user/action-list/{action}:
     get:
       consumes:

@@ -7,10 +7,12 @@ import (
 	"strings"
 
 	. "github.com/digisan/go-generics/v2"
+	lk "github.com/digisan/logkit"
 	u "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/nsip/data-dic-api/server/api/db"
+	"github.com/nsip/data-dic-api/server/email"
 )
 
 // @Title list users' info
@@ -145,4 +147,71 @@ func ListUserAction(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	return c.JSON(http.StatusOK, ls)
+}
+
+// @Title
+// @Summary
+// @Description
+// @Tags    Admin
+// @Accept  multipart/form-data
+// @Produce json
+// @Param   uname   formData string true "unique user name"
+// @Param   subject formData string true "subject for email"
+// @Param	body    formData string true "body for email"
+// @Success 200 "OK - list successfully"
+// @Failure 401 "Fail - unauthorized error"
+// @Failure 403 "Fail - forbidden error"
+// @Failure 500 "Fail - internal error"
+// @Router /api/admin/email [post]
+// @Security ApiKeyAuth
+func SendEmail(c echo.Context) error {
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)
+		claims  = userTkn.Claims.(*u.UserClaims)
+		admin   = claims.UName
+	)
+
+	user, ok, err := u.LoadActiveUser(admin)
+
+	switch {
+	case err != nil:
+		return c.String(http.StatusInternalServerError, err.Error())
+	case !ok:
+		return c.String(http.StatusForbidden, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
+	}
+
+	// if user.MemLevel != 3 {
+	// 	return c.String(http.StatusUnauthorized, "failed, you are not authorized to this api")
+	// }
+
+	var (
+		uname   = c.FormValue("uname")
+		subject = c.FormValue("subject")
+		body    = c.FormValue("body")
+	)
+
+	lk.Log("[%v] [%v] [%v]", uname, subject, body)
+
+	user, ok, err = u.LoadUser(uname, true)
+	switch {
+	case err != nil:
+		return c.String(http.StatusInternalServerError, err.Error())
+	case !ok:
+		return c.String(http.StatusBadRequest, fmt.Sprintf("[%s] doesn't exist", uname))
+	}
+
+	msg, id, err := email.Send(user.Email, subject, body)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, struct {
+		Message string
+		ID      string
+		Resp    string
+	}{
+		Message: msg,
+		ID:      id,
+		Resp:    fmt.Sprintf("email sent to [%v] @ [%v]", uname, user.Email),
+	})
 }

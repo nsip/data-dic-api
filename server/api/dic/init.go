@@ -21,6 +21,8 @@ var (
 
 func init() {
 
+	lk.Log("starting...dic")
+
 	//
 	mListCache["existing"] = make(map[string][]string)
 	mListCache["text"] = make(map[string][]string)
