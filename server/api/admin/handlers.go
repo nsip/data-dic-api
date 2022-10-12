@@ -155,7 +155,7 @@ func ListUserAction(c echo.Context) error {
 // @Tags    Admin
 // @Accept  multipart/form-data
 // @Produce json
-// @Param   uname   formData string true "unique user name"
+// @Param   unames  formData string true "unique user names, separator is ',' "
 // @Param   subject formData string true "subject for email"
 // @Param	body    formData string true "body for email"
 // @Success 200 "OK - list successfully"
@@ -185,33 +185,49 @@ func SendEmail(c echo.Context) error {
 	// 	return c.String(http.StatusUnauthorized, "failed, you are not authorized to this api")
 	// }
 
-	var (
-		uname   = c.FormValue("uname")
-		subject = c.FormValue("subject")
-		body    = c.FormValue("body")
+	const (
+		sep = "," // separator for unames
 	)
 
-	lk.Log("[%v] [%v] [%v]", uname, subject, body)
+	var (
+		unames  = c.FormValue("unames")  // recipients, separator is ','
+		subject = c.FormValue("subject") // email title
+		body    = c.FormValue("body")    // email content
+	)
 
-	user, ok, err = u.LoadUser(uname, true)
-	switch {
-	case err != nil:
-		return c.String(http.StatusInternalServerError, err.Error())
-	case !ok:
-		return c.String(http.StatusBadRequest, fmt.Sprintf("[%s] doesn't exist", uname))
-	}
-
-	msg, id, err := email.Send(user.Email, subject, body)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	return c.JSON(http.StatusOK, struct {
+	type retType struct {
 		Message string
 		ID      string
 		Resp    string
-	}{
-		Message: msg,
-		ID:      id,
-		Resp:    fmt.Sprintf("email sent to [%v] @ [%v]", uname, user.Email),
-	})
+	}
+	ret := []retType{}
+
+	for _, uname := range strings.Split(unames, sep) {
+		lk.Log("[%v] [%v] [%v]", uname, subject, body)
+
+		user, ok, err = u.LoadUser(uname, true)
+		switch {
+		case err != nil:
+			return c.String(http.StatusInternalServerError, err.Error())
+		case !ok:
+			return c.String(http.StatusBadRequest, fmt.Sprintf("[%s] doesn't exist", uname))
+		}
+
+		msg, id, err := email.Send(user.Email, subject, body)
+		if err != nil {
+			ret = append(ret, retType{
+				Message: msg,
+				ID:      id,
+				Resp:    fmt.Sprintf("email failed to [%v] @ [%v], error is [%v]", uname, user.Email, err),
+			})
+			continue
+		}
+		ret = append(ret, retType{
+			Message: msg,
+			ID:      id,
+			Resp:    fmt.Sprintf("email sent to [%v] @ [%v]", uname, user.Email),
+		})
+	}
+
+	return c.JSON(http.StatusOK, ret)
 }

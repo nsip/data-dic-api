@@ -15,9 +15,9 @@ paths:
       consumes:
       - multipart/form-data
       parameters:
-      - description: unique user name
+      - description: 'unique user names, separator is '','' '
         in: formData
-        name: uname
+        name: unames
         required: true
         type: string
       - description: subject for email

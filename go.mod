@@ -11,7 +11,7 @@ require (
 	github.com/digisan/logkit v0.1.3
 	github.com/digisan/user-mgr v0.3.8
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/labstack/echo/v4 v4.9.0
+	github.com/labstack/echo/v4 v4.9.1
 	github.com/mailgun/mailgun-go/v4 v4.8.1
 	github.com/postfinance/single v0.0.2
 	github.com/swaggo/echo-swagger v1.3.5
@@ -70,8 +70,8 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/crypto v0.0.0-20221010152910-d6f0a8c073c2 // indirect
-	golang.org/x/net v0.0.0-20221004154528-8021a29435af // indirect
+	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
+	golang.org/x/net v0.0.0-20221012135044-0b7e1fb9d458 // indirect
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
 	golang.org/x/sys v0.0.0-20221010170243-090e33056c14 // indirect
 	golang.org/x/text v0.3.8 // indirect

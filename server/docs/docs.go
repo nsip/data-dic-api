@@ -41,8 +41,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "unique user name",
-                        "name": "uname",
+                        "description": "unique user names, separator is ',' ",
+                        "name": "unames",
                         "in": "formData",
                         "required": true
                     },
