@@ -411,6 +411,11 @@ paths:
         name: name
         required: true
         type: string
+      - description: from which db collection? [existing, text, html]
+        in: query
+        name: dbcol
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -418,8 +423,6 @@ paths:
           description: OK - got kind ('entity' or 'collection') successfully
         "404":
           description: Fail - neither 'entity' nor 'collection'
-        "500":
-          description: Fail - internal error
       summary: check item's kind ('entity' or 'collection') by its name
       tags:
       - Dictionary

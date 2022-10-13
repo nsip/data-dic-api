@@ -412,10 +412,10 @@ func Clear(c echo.Context) error {
 // @Tags    Dictionary
 // @Accept  json
 // @Produce json
-// @Param   name query string true "Entity name for checking kind"
+// @Param   name  query string true "Entity name for checking kind"
+// @Param   dbcol query string true "from which db collection? [existing, text, html]"
 // @Success 200 "OK - got kind ('entity' or 'collection') successfully"
 // @Failure 404 "Fail - neither 'entity' nor 'collection'"
-// @Failure 500 "Fail - internal error"
 // @Router /api/dictionary/pub/kind [get]
 func ItemKind(c echo.Context) error {
 	mtx.Lock()
@@ -424,15 +424,16 @@ func ItemKind(c echo.Context) error {
 	lk.Log("Enter: CheckItemKind")
 
 	var (
-		name = c.QueryParam("name")
+		name  = c.QueryParam("name")
+		dbcol = c.QueryParam("dbcol") // existing, text, html
 	)
 
-	if len(mListCache["existing"]) == 0 {
-		return c.String(http.StatusInternalServerError, "list cache hasn't been loaded")
+	if len(mListCache[dbcol]) == 0 {
+		return c.String(http.StatusNotFound, "list cache hasn't been loaded")
 	}
 
-	lsEntity, okEntity := mListCache["existing"]["entity"]
-	lsCollection, okCollection := mListCache["existing"]["collection"]
+	lsEntity, okEntity := mListCache[dbcol]["entity"]
+	lsCollection, okCollection := mListCache[dbcol]["collection"]
 
 	switch {
 	case okEntity && strs.IsIn(true, true, name, lsEntity...):

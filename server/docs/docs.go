@@ -654,6 +654,13 @@ const docTemplate = `{
                         "name": "name",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "from which db collection? [existing, text, html]",
+                        "name": "dbcol",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -662,9 +669,6 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Fail - neither 'entity' nor 'collection'"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
                     }
                 }
             }
