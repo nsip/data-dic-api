@@ -81,9 +81,54 @@ func NewUser(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 
+	if err := su.ChkEmail(user); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, "waiting verification code in your email")
+
 	///////////////////////////////////////////////
 	// simple sing up, ignore email verification //
 	///////////////////////////////////////////////
+
+	// // store into db
+	// if err := su.Store(user); err != nil {
+	// 	return c.String(http.StatusInternalServerError, err.Error())
+	// }
+	// // sign-up ok calling...
+	// {
+	// }
+	// return c.JSON(http.StatusOK, "registered successfully")
+}
+
+// @Title verify new user's email
+// @Summary sign up action, step 2. send back email verification code
+// @Description
+// @Tags    User
+// @Accept  multipart/form-data
+// @Produce json
+// @Param   uname formData string true "unique user name"
+// @Param   code  formData string true "verification code (in user's email)"
+// @Success 200 "OK - sign-up successfully"
+// @Failure 400 "Fail - incorrect verification code"
+// @Failure 500 "Fail - internal error"
+// @Router /api/user/pub/verify-email [post]
+func VerifyEmail(c echo.Context) error {
+
+	var (
+		uname = c.FormValue("uname")
+		code  = c.FormValue("code")
+	)
+
+	user, err := su.VerifyCode(uname, code)
+	if err != nil || user == nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	// double check before storing
+	if err := su.ChkInput(user); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
 
 	// store into db
 	if err := su.Store(user); err != nil {
@@ -94,7 +139,7 @@ func NewUser(c echo.Context) error {
 	{
 	}
 
-	return c.JSON(http.StatusOK, "registered successfully")
+	return c.JSON(http.StatusOK, "sign up successfully")
 }
 
 // @Title sign in

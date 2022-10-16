@@ -627,6 +627,33 @@ paths:
       summary: sign up action, send user's basic info for registry
       tags:
       - User
+  /api/user/pub/verify-email:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: unique user name
+        in: formData
+        name: uname
+        required: true
+        type: string
+      - description: verification code (in user's email)
+        in: formData
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - sign-up successfully
+        "400":
+          description: Fail - incorrect verification code
+        "500":
+          description: Fail - internal error
+      summary: sign up action, step 2. send back email verification code
+      tags:
+      - User
 securityDefinitions:
   ApiKeyAuth:
     in: header

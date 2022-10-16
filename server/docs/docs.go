@@ -980,6 +980,47 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/user/pub/verify-email": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "sign up action, step 2. send back email verification code",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "unique user name",
+                        "name": "uname",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "verification code (in user's email)",
+                        "name": "code",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK - sign-up successfully"
+                    },
+                    "400": {
+                        "description": "Fail - incorrect verification code"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
         }
     },
     "securityDefinitions": {
