@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	. "github.com/digisan/go-generics/v2"
+	gm "github.com/digisan/go-mail"
 	lk "github.com/digisan/logkit"
 	u "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/nsip/data-dic-api/server/api/db"
-	"github.com/nsip/data-dic-api/server/email"
 )
 
 // @Title list users' info
@@ -196,9 +196,10 @@ func SendEmail(c echo.Context) error {
 	)
 
 	type retType struct {
-		Message string
-		ID      string
-		Resp    string
+		OK     bool
+		Sent   string
+		Failed string
+		Err    error
 	}
 	ret := []retType{}
 
@@ -213,19 +214,12 @@ func SendEmail(c echo.Context) error {
 			return c.String(http.StatusBadRequest, fmt.Sprintf("[%s] doesn't exist", uname))
 		}
 
-		msg, id, err := email.Send(user.Email, subject, body)
-		if err != nil {
-			ret = append(ret, retType{
-				Message: msg,
-				ID:      id,
-				Resp:    fmt.Sprintf("email failed to [%v] @ [%v], error is [%v]", uname, user.Email, err),
-			})
-			continue
-		}
+		ok, sent, failed, errs := gm.SendMG(subject, body, user.Email)
 		ret = append(ret, retType{
-			Message: msg,
-			ID:      id,
-			Resp:    fmt.Sprintf("email sent to [%v] @ [%v]", uname, user.Email),
+			OK:     ok,
+			Sent:   sent[0],
+			Failed: failed[0],
+			Err:    errs[0],
 		})
 	}
 

@@ -14,11 +14,11 @@ cd ./auto-gen
 go run .
 cd -
 
-GOARCH=amd64
 LDFLAGS="-s -w"
-
 TM=`date +%F@%T@%Z`
-OUT=server\($TM\)
+OUT=data-dic-api\($TM\)
+
+GOARCH=amd64
 
 # For Docker, one build below for linux64 is enough.
 OUTPATH_LINUX=./build/linux64/
@@ -40,7 +40,7 @@ cd -
 cp -rf ../data $OUTPATH_LINUX
 
 # copy email config file to current folder
-cp -rf ./email/email-config.json $OUTPATH_LINUX
+cp -rf ../mailgun-config.json $OUTPATH_LINUX
 
 #######################################################################################
 
