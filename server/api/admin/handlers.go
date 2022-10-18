@@ -197,9 +197,9 @@ func SendEmail(c echo.Context) error {
 
 	type retType struct {
 		OK     bool
-		Sent   string
-		Failed string
-		Err    error
+		Sent   []string
+		Failed []string
+		Err    []error
 	}
 	ret := []retType{}
 
@@ -217,9 +217,9 @@ func SendEmail(c echo.Context) error {
 		ok, sent, failed, errs := gm.SendMG(subject, body, user.Email)
 		ret = append(ret, retType{
 			OK:     ok,
-			Sent:   sent[0],
-			Failed: failed[0],
-			Err:    errs[0],
+			Sent:   sent,
+			Failed: failed,
+			Err:    errs,
 		})
 	}
 
