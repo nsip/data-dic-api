@@ -41,6 +41,7 @@ cp -rf ../data $OUTPATH_LINUX
 
 # copy email config file to current folder
 cp -rf ../mailgun-config.json $OUTPATH_LINUX
+cp -rf ../sendgrid-config.json $OUTPATH_LINUX
 
 #######################################################################################
 

@@ -10,7 +10,7 @@ require (
 	github.com/digisan/gotk v0.2.0
 	github.com/digisan/json-tool v0.1.6
 	github.com/digisan/logkit v0.1.3
-	github.com/digisan/user-mgr v0.4.1
+	github.com/digisan/user-mgr v0.4.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/mailgun/mailgun-go/v4 v4.8.1
