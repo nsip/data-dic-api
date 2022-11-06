@@ -214,7 +214,7 @@ func SendEmail(c echo.Context) error {
 			return c.String(http.StatusBadRequest, fmt.Sprintf("[%s] doesn't exist", uname))
 		}
 
-		ok, sent, failed, errs := gm.SendMG(subject, body, user.Email)
+		ok, sent, failed, errs := gm.SendMail(subject, body, user.Email)
 		ret = append(ret, retType{
 			OK:     ok,
 			Sent:   sent,
