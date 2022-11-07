@@ -24,7 +24,7 @@ import (
 // @Param   uname  query string false "user filter with uname wildcard(*)"
 // @Param   name   query string false "user filter with name wildcard(*)"
 // @Param   active query string false "user filter with active status"
-// @Param   field  path  string true  "which user's field want to list"
+// @Param   field  path  string false "which user's field want to list. if empty, return all fields"
 // @Success 200 "OK - list successfully"
 // @Failure 401 "Fail - unauthorized error"
 // @Failure 403 "Fail - forbidden error"
@@ -32,6 +32,8 @@ import (
 // @Router /api/admin/user/list/{field} [get]
 // @Security ApiKeyAuth
 func ListUser(c echo.Context) error {
+
+	lk.Log("Enter: ListUser")
 
 	var (
 		userTkn = c.Get("user").(*jwt.Token)

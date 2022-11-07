@@ -7,7 +7,7 @@ require (
 	github.com/digisan/go-config v0.0.8
 	github.com/digisan/go-generics v0.2.3
 	github.com/digisan/go-mail v0.0.4
-	github.com/digisan/gotk v0.2.0
+	github.com/digisan/gotk v0.2.1
 	github.com/digisan/json-tool v0.1.6
 	github.com/digisan/logkit v0.1.3
 	github.com/digisan/user-mgr v0.4.2
