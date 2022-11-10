@@ -164,7 +164,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "which user's field want to list, if empty, return all fields",
+                        "description": "which user's field want to list. if empty, return all fields",
                         "name": "field",
                         "in": "path"
                     }

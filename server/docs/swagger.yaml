@@ -94,7 +94,7 @@ paths:
         in: query
         name: active
         type: string
-      - description: which user's field want to list, if empty, return all fields
+      - description: which user's field want to list. if empty, return all fields
         in: path
         name: field
         type: string

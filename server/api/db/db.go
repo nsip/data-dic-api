@@ -365,5 +365,8 @@ func ListActionRecord(user string, from DbColType) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	if record == nil {
+		return []string{}, err
+	}
 	return FilterMap(record.Did, nil, func(i int, e DidItem) string { return e.Name }), nil
 }
