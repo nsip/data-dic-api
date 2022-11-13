@@ -77,7 +77,7 @@ paths:
       summary: list user's action record
       tags:
       - Admin
-  /api/admin/user/list/{field}:
+  /api/admin/user/list/{fields}:
     get:
       consumes:
       - application/json
@@ -94,9 +94,10 @@ paths:
         in: query
         name: active
         type: string
-      - description: which user's field want to list. if empty, return all fields
+      - description: which user's fields (sep by ',') want to list. if empty, return
+          all fields
         in: path
-        name: field
+        name: fields
         type: string
       produces:
       - application/json

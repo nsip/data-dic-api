@@ -35,12 +35,12 @@ github.com/digisan/db-helper v0.0.17 h1:CVivDOTiritYYuASe/3OPuROTrhTkQr6KDeymjbA
 github.com/digisan/db-helper v0.0.17/go.mod h1:GIzChwb4vh8uazY9EqER362felfqo0O+5TuLEqAOM8o=
 github.com/digisan/go-config v0.0.8 h1:lMwLl/bpQH4beCsxTXAwlY7pnTbmLRBLMsvZRjjFK/k=
 github.com/digisan/go-config v0.0.8/go.mod h1:o574zvg3V4lMyuYmqdhRaoIjIS7nAmzuxKhvsk8phJc=
-github.com/digisan/go-generics v0.2.3 h1:5VXV0kKZMo9Nzx4Rs+/6APHWr/e9uJf3AuZ1FgtlagU=
-github.com/digisan/go-generics v0.2.3/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
+github.com/digisan/go-generics v0.2.4 h1:vXKyT4KIZ1M42eQ/seXCJqN+Aj0qzGihjaX60GkDBq0=
+github.com/digisan/go-generics v0.2.4/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
 github.com/digisan/go-mail v0.0.4 h1:XPhE23FoGcL00A8mD/ta9F8+s0F8LyLD89oZQsJtEYk=
 github.com/digisan/go-mail v0.0.4/go.mod h1:zw5kpbLpggLDYUEsH1pGKbrIim0ZhoPVwwhDCHHIWW0=
-github.com/digisan/gotk v0.2.1 h1:N7Cepbtt4z3QRfFNXzwrXbG7yGwRAtchH49XZdCp9mU=
-github.com/digisan/gotk v0.2.1/go.mod h1:W4jENNtTREu2c2MeBpR8mUGo4OD8vJTmy/0kiGHZybI=
+github.com/digisan/gotk v0.2.4 h1:h0Xea8eoaj7Xk+hBAly4qCTzx+Ynqbdhwwd0/sZG8Uc=
+github.com/digisan/gotk v0.2.4/go.mod h1:haIFoZmSooia8sqDY1VFT4jZr7LcSkzyRgUZPBgnQeo=
 github.com/digisan/json-tool v0.1.6 h1:P45q40by0/HcjkNAsUlOtz5LywMcSe4JSkjqDjTB8LM=
 github.com/digisan/json-tool v0.1.6/go.mod h1:XDKMbw/UBLB7WwdFyftPcZa9Qv5J2/HZ9sZsloxye5s=
 github.com/digisan/logkit v0.1.3 h1:bbjtcW6fY+SwTgO0Hx2PfCJbLdMQL6NjFNiaaparQko=

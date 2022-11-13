@@ -126,7 +126,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/admin/user/list/{field}": {
+        "/api/admin/user/list/{fields}": {
             "get": {
                 "security": [
                     {
@@ -164,8 +164,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "which user's field want to list. if empty, return all fields",
-                        "name": "field",
+                        "description": "which user's fields (sep by ',') want to list. if empty, return all fields",
+                        "name": "fields",
                         "in": "path"
                     }
                 ],

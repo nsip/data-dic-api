@@ -3,11 +3,13 @@ package admin
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
 	. "github.com/digisan/go-generics/v2"
 	gm "github.com/digisan/go-mail"
+	structtool "github.com/digisan/gotk/struct-tool"
 	lk "github.com/digisan/logkit"
 	u "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
@@ -24,12 +26,12 @@ import (
 // @Param   uname  query string false "user filter with uname wildcard(*)"
 // @Param   name   query string false "user filter with name wildcard(*)"
 // @Param   active query string false "user filter with active status"
-// @Param   field  path  string false "which user's field want to list. if empty, return all fields"
+// @Param   fields  path  string false "which user's fields (sep by ',') want to list. if empty, return all fields"
 // @Success 200 "OK - list successfully"
 // @Failure 401 "Fail - unauthorized error"
 // @Failure 403 "Fail - forbidden error"
 // @Failure 500 "Fail - internal error"
-// @Router /api/admin/user/list/{field} [get]
+// @Router /api/admin/user/list/{fields} [get]
 // @Security ApiKeyAuth
 func ListUser(c echo.Context) error {
 
@@ -62,7 +64,7 @@ func ListUser(c echo.Context) error {
 		wName  = c.QueryParam("name")
 		rUname = wc2re(wUname)
 		rName  = wc2re(wName)
-		field  = c.Param("field")
+		fields = c.Param("fields")
 	)
 
 	users, err := u.ListUser(func(u *u.User) bool {
@@ -88,17 +90,25 @@ func ListUser(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	var rt any
-	switch field {
-	case "uname", "Uname", "ID", "Id", "id":
-		rt = FilterMap(users, nil, func(i int, e *u.User) string { return e.UName })
-	case "email", "Email":
-		rt = FilterMap(users, nil, func(i int, e *u.User) string { return e.Email })
-	case "name", "Name":
-		rt = FilterMap(users, nil, func(i int, e *u.User) string { return e.Name })
-	default:
-		rt = users
+	if len(fields) == 0 {
+		return c.JSON(http.StatusOK, users)
 	}
+
+	if fields, err = url.QueryUnescape(fields); err != nil {
+		c.String(http.StatusBadRequest, "'fields' is invalid")
+	}
+
+	fieldsUser := []string{}
+	for _, field := range strings.Split(fields, ",") {
+		fieldsUser = AppendIf(In(field, "uname", "Uname", "ID", "Id", "id"), fieldsUser, "UName")
+		fieldsUser = AppendIf(In(field, "email", "Email"), fieldsUser, "Email")
+		fieldsUser = AppendIf(In(field, "name", "Name"), fieldsUser, "Name")
+	}
+	rt := FilterMap(users, nil, func(i int, e *u.User) any {
+		v, err := structtool.PartialAsMap(e, fieldsUser...)
+		lk.WarnOnErr("%v", err)
+		return v
+	})
 	return c.JSON(http.StatusOK, rt)
 }
 
