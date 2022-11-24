@@ -175,9 +175,9 @@ func Items(c echo.Context) error {
 	)
 	switch kind {
 	case "entity":
-		result, err = db.Many[db.EntityType](cfg, db.DbColType(dbcol), name)
+		result, err = db.Many[db.EntType](cfg, db.DbColType(dbcol), name)
 	case "collection":
-		result, err = db.Many[db.CollectionType](cfg, db.DbColType(dbcol), name)
+		result, err = db.Many[db.ColType](cfg, db.DbColType(dbcol), name)
 	}
 	if err != nil {
 		lk.WarnOnErr("%v", err)
@@ -221,9 +221,9 @@ func List(c echo.Context) error {
 	)
 	switch kind {
 	case "entity":
-		names, err = db.ListMany[db.EntityType](cfg, db.DbColType(dbcol), name)
+		names, err = db.ListMany[db.EntType](cfg, db.DbColType(dbcol), name)
 	case "collection":
-		names, err = db.ListMany[db.CollectionType](cfg, db.DbColType(dbcol), name)
+		names, err = db.ListMany[db.ColType](cfg, db.DbColType(dbcol), name)
 	}
 	if err != nil {
 		lk.WarnOnErr("%v", err)
@@ -276,9 +276,9 @@ func One(c echo.Context) error {
 		)
 		switch kind {
 		case "entity":
-			result, err = db.One[db.EntityType](cfg, db.DbColType(dbcol), name, fuzzy)
+			result, err = db.One[db.EntType](cfg, db.DbColType(dbcol), name, fuzzy)
 		case "collection":
-			result, err = db.One[db.CollectionType](cfg, db.DbColType(dbcol), name, fuzzy)
+			result, err = db.One[db.ColType](cfg, db.DbColType(dbcol), name, fuzzy)
 		}
 		if err != nil {
 			lk.WarnOnErr("%v", err)
@@ -347,9 +347,9 @@ func Delete(c echo.Context) error {
 		)
 		switch kind {
 		case "entity":
-			n, err = db.Del[db.EntityType](cfg, db.DbColType(dbcol), name)
+			n, err = db.Del[db.EntType](cfg, db.DbColType(dbcol), name)
 		case "collection":
-			n, err = db.Del[db.CollectionType](cfg, db.DbColType(dbcol), name)
+			n, err = db.Del[db.ColType](cfg, db.DbColType(dbcol), name)
 		}
 		if err != nil {
 			lk.WarnOnErr("%v", err)
@@ -394,9 +394,9 @@ func Clear(c echo.Context) error {
 	)
 	switch kind {
 	case "entity":
-		n, err = db.Clr[db.EntityType](cfg, db.DbColType(dbcol))
+		n, err = db.Clr[db.EntType](cfg, db.DbColType(dbcol))
 	case "collection":
-		n, err = db.Clr[db.CollectionType](cfg, db.DbColType(dbcol))
+		n, err = db.Clr[db.ColType](cfg, db.DbColType(dbcol))
 	}
 	if err != nil {
 		lk.WarnOnErr("%v", err)

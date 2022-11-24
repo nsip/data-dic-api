@@ -1,6 +1,8 @@
 package ingest
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,7 +13,9 @@ import (
 	mh "github.com/digisan/db-helper/mongo"
 	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
+	"github.com/nsip/data-dic-api/server/api/db"
 	"github.com/tidwall/gjson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -55,76 +59,79 @@ func IngestViaCmd(clrdb bool) error {
 	return nil
 }
 
-func clearDb(db string) error {
-	if err := mh.DropCol(db, "pathval"); err != nil {
+func clearDb(DB string) error {
+	if err := mh.DropCol(DB, "pathval"); err != nil {
 		return err
 	}
-	if err := mh.DropCol(db, "class"); err != nil {
+	if err := mh.DropCol(DB, "class"); err != nil {
 		return err
 	}
-	if err := mh.DropCol(db, "colentities"); err != nil {
+	if err := mh.DropCol(DB, "colentities"); err != nil {
 		return err
 	}
-	if err := mh.DropCol(db, "collections"); err != nil {
+	if err := mh.DropCol(DB, "collections"); err != nil {
 		return err
 	}
-	if err := mh.DropCol(db, "entities"); err != nil {
+	if err := mh.DropCol(DB, "entities"); err != nil {
 		return err
 	}
 	return nil
 }
 
-func ingestAll(db string) error {
+func ingestAll(DB string) error {
 
 	// ingest existing entities json files
-	if err := ingestFromDir(db, "entities", "./data/out", "Entity", "class-link.json", "collection-entities.json"); err != nil {
+	if err := ingestFromDir(DB, "entities", "./data/out", "Entity", "class-link.json", "collection-entities.json"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Entity ClassLinkage
-	if err := ingestFromFile(db, "class", "./data/out/class-link.json", "RefName"); err != nil {
+	if err := ingestFromFile(DB, "class", "./data/out/class-link.json", "RefName"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Entities PathVal
-	if err := ingestFromDir(db, "pathval", "./data/out/path_val", "Entity"); err != nil {
+	if err := ingestFromDir(DB, "pathval", "./data/out/path_val", "Entity"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Collections
-	if err := ingestFromDir(db, "collections", "./data/out/collections", "Entity", "class-link.json", "collection-entities.json"); err != nil {
+	if err := ingestFromDir(DB, "collections", "./data/out/collections", "Entity", "class-link.json", "collection-entities.json"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Collections PathVal
-	if err := ingestFromDir(db, "pathval", "./data/out/collections/path_val", "Entity"); err != nil {
+	if err := ingestFromDir(DB, "pathval", "./data/out/collections/path_val", "Entity"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
 
 	// ingest Collection-Entities
-	if err := ingestFromFile(db, "colentities", "./data/out/collection-entities.json", "RefName"); err != nil {
+	if err := ingestFromFile(DB, "colentities", "./data/out/collection-entities.json", "RefName"); err != nil {
 		lk.WarnOnErr("%v", err)
 		return err
 	}
+
+	// append 'colentities' to 'collections' 'Entities' field
+	colEntitiesToCollections(DB)
 
 	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-func ingestFromDir(db, col, dpath, idfield string, exclfiles ...string) error {
+func ingestFromDir(DB, Col, dpath, idfield string, exclfiles ...string) error {
 
 	des, err := os.ReadDir(dpath)
 	if err != nil {
 		return err
 	}
 
-	mh.UseDbCol(db, col)
+	mh.UseDbCol(DB, Col)
 
 	nFile := 0
 	for _, de := range des {
@@ -166,11 +173,11 @@ func ingestFromDir(db, col, dpath, idfield string, exclfiles ...string) error {
 		nFile++
 	}
 
-	lk.Log("all [%d] files have been ingested or updated on [%v]", nFile, col)
+	lk.Log("all [%d] files have been ingested or updated on [%v]", nFile, Col)
 	return nil
 }
 
-func ingestFromFile(db, col, fpath, idfield string) error {
+func ingestFromFile(DB, Col, fpath, idfield string) error {
 
 	if !strings.HasSuffix(fpath, ".json") {
 		return nil
@@ -191,13 +198,43 @@ func ingestFromFile(db, col, fpath, idfield string) error {
 		return err
 	}
 
-	mh.UseDbCol(db, col)
+	mh.UseDbCol(DB, Col)
 
 	_, _, err = mh.Upsert(file, idfield, id)
 	if err != nil {
 		return err
 	}
 
-	lk.Log("[%v] has been updated on [%v]", id, col)
+	lk.Log("[%v] has been updated on [%v]", id, Col)
 	return nil
+}
+
+func colEntitiesToCollections(DB string) {
+
+	mh.UseDbCol(DB, "colentities") // this db-collection only has one single doc
+
+	colEntities, err := mh.FindOneAt[map[string]any]("RefName", "CollectionEntities")
+	lk.FailOnErr("%v", err)
+
+	delete(*colEntities, "_id")
+	delete(*colEntities, "RefName") // "CollectionEntities" must have field "RefName"
+
+	mh.UseDbCol(DB, "collections") // in this db-collection, each Collection-Item has its own doc
+
+	collections, err := mh.Find[db.ColType](nil)
+	lk.FailOnErr("%v", err)
+	for _, col := range collections {
+
+		for _, e := range (*colEntities)[col.Entity].(primitive.A) {
+			col.Entities = append(col.Entities, e.(string))
+		}
+
+		if len(col.Entities) > 0 {
+			data, err := json.Marshal(*col)
+			lk.FailOnErr("%v", err)
+
+			_, _, err = mh.ReplaceOneAt("Entity", col.Entity, bytes.NewReader(data))
+			lk.FailOnErr("%v", err)
+		}
+	}
 }

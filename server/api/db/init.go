@@ -16,7 +16,7 @@ const (
 
 type (
 	DbColType string
-	DbColVal  string
+	DbColName string
 )
 
 const (
@@ -34,9 +34,9 @@ const (
 //////////////////////////////////////////////////////
 
 type ItemConfig struct {
-	DbColExisting DbColVal
-	DbColText     DbColVal
-	DbColHtml     DbColVal
+	DbColExisting DbColName
+	DbColText     DbColName
+	DbColHtml     DbColName
 	DirExisting   string
 	DirText       string
 	DirHtml       string
@@ -48,7 +48,7 @@ func (cfg ItemConfig) String() string {
 	return db + lk.LF + dir
 }
 
-func (cfg ItemConfig) DbColVal(col DbColType) DbColVal {
+func (cfg ItemConfig) DbColName(col DbColType) DbColName {
 	switch col {
 	case Existing:
 		return cfg.DbColExisting
@@ -57,16 +57,17 @@ func (cfg ItemConfig) DbColVal(col DbColType) DbColVal {
 	case Html:
 		return cfg.DbColHtml
 	default:
-		return ""
+		lk.FailOnErr("%v", fmt.Errorf("DbColType [%v] is unknown", col))
 	}
+	return ""
 }
 
 /////////////////////////////////////////////////////////////
 
 type ActionConfig struct {
-	DbColSubmit    DbColVal
-	DbColApprove   DbColVal
-	DbColSubscribe DbColVal
+	DbColSubmit    DbColName
+	DbColApprove   DbColName
+	DbColSubscribe DbColName
 }
 
 func (cfg ActionConfig) String() string {
@@ -79,7 +80,7 @@ func (cfg ActionConfig) String() string {
 	return db
 }
 
-func (cfg ActionConfig) DbColVal(col DbColType) DbColVal {
+func (cfg ActionConfig) DbColName(col DbColType) DbColName {
 	switch col {
 	case Submit:
 		return cfg.DbColSubmit
@@ -88,8 +89,9 @@ func (cfg ActionConfig) DbColVal(col DbColType) DbColVal {
 	case Subscribe:
 		return cfg.DbColSubscribe
 	default:
-		return ""
+		lk.FailOnErr("%v", fmt.Errorf("DbColType [%v] is unknown", col))
 	}
+	return ""
 }
 
 //////////////////////////////////////////////////////
@@ -121,9 +123,9 @@ var (
 	}
 
 	// Computed
-	ColEntities DbColVal = "colentities"
-	Class       DbColVal = "class"
-	PathVal     DbColVal = "pathval"
+	ColEntities DbColName = "colentities"
+	Class       DbColName = "class"
+	PathVal     DbColName = "pathval"
 
 	//////////////////////////////////////////////////
 

@@ -5,10 +5,14 @@ import (
 	"time"
 
 	lk "github.com/digisan/logkit"
+	"github.com/tidwall/gjson"
 )
 
-type EntityType struct {
-	Entity     string
+// all Item must have 'Metadata.Type' field !!!
+
+// same as ingested json schema
+type EntType struct {
+	Entity     string // *
 	OtherNames []string
 	Definition string
 	SIF        []struct {
@@ -42,42 +46,47 @@ type EntityType struct {
 	}
 	Metadata struct {
 		Identifier         string
-		Type               string
+		Type               string //*
 		ExpectedAttributes []string
 		Superclass         []string
 		CrossrefEntities   []string
 	}
 }
 
-type CollectionType struct {
-	Entity     string
+// same as ingested json schema
+type ColType struct {
+	Entity     string // *
 	Definition string
 	URL        []string
 	Metadata   struct {
 		Identifier string
-		Type       string
+		Type       string // *
 	}
+	Entities []string // this field will be filled from other dbcol
 }
 
 func ItemKind(data []byte) string {
-	var (
-		ent = &EntityType{}
-		col = &CollectionType{}
-	)
-	switch {
-	case json.Unmarshal(data, ent) == nil:
-		return "entity"
-	case json.Unmarshal(data, col) == nil:
-		return "collection"
-	default:
-		return ""
-	}
+
+	return gjson.Get(string(data), "Metadata.Type").String()
+
+	// var (
+	// 	ent = &EntityType{}
+	// 	col = &CollectionType{}
+	// )
+	// switch {
+	// case json.Unmarshal(data, ent) == nil:
+	// 	return "entity"
+	// case json.Unmarshal(data, col) == nil:
+	// 	return "collection"
+	// default:
+	// 	return ""
+	// }
 }
 
 func Item[T any](data []byte) *T {
 	var (
-		ent any = &EntityType{}
-		col any = &CollectionType{}
+		ent any = &EntType{}
+		col any = &ColType{}
 	)
 	switch {
 	case json.Unmarshal(data, ent) == nil:

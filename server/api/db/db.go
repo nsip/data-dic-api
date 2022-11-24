@@ -21,7 +21,9 @@ func fieldStr[T any](v *T, field string) string {
 	return f.String()
 }
 
-// from: existing, text, html
+// all Item in db must have 'Entity' field !!!
+
+// from: existing, text, html; [itemName] is Item 'Entity' value
 func One[T any](cfg ItemConfig, from DbColType, itemName string, fuzzy bool) (*T, error) {
 	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, itemName)
 	if fuzzy {
@@ -29,12 +31,8 @@ func One[T any](cfg ItemConfig, from DbColType, itemName string, fuzzy bool) (*T
 	}
 	lk.Log("sFilter %v", sFilter)
 
-	COL := cfg.DbColVal(from)
-	if len(COL) == 0 {
-		return nil, fmt.Errorf("from DbCol can only be [existing, text, html]")
-	}
+	mh.UseDbCol(DATABASE, string(cfg.DbColName(from)))
 
-	mh.UseDbCol(DATABASE, string(COL))
 	found, err := mh.FindOne[T](strings.NewReader(sFilter))
 	if err != nil {
 		return nil, err
@@ -42,7 +40,7 @@ func One[T any](cfg ItemConfig, from DbColType, itemName string, fuzzy bool) (*T
 	return found, nil
 }
 
-// from: existing, text, html
+// from: existing, text, html; [filterName] is Item 'Entity' value
 func Many[T any](cfg ItemConfig, from DbColType, filterName string) ([]*T, error) {
 	var rFilter io.Reader = nil // NOT using "*strings.Reader = nil" as nil interface
 	if len(filterName) > 0 {
@@ -51,12 +49,8 @@ func Many[T any](cfg ItemConfig, from DbColType, filterName string) ([]*T, error
 		rFilter = strings.NewReader(sFilter)
 	}
 
-	COL := cfg.DbColVal(from)
-	if len(COL) == 0 {
-		return nil, fmt.Errorf("from ItemDbCol can only be [existing, text, html]")
-	}
+	mh.UseDbCol(DATABASE, string(cfg.DbColName(from)))
 
-	mh.UseDbCol(DATABASE, string(COL))
 	found, err := mh.Find[T](rFilter)
 	if err != nil {
 		return nil, err
@@ -64,7 +58,7 @@ func Many[T any](cfg ItemConfig, from DbColType, filterName string) ([]*T, error
 	return found, nil
 }
 
-// from: existing, text, html
+// from: existing, text, html; return list of Item 'Entity' value
 func ListMany[T any](cfg ItemConfig, from DbColType, filterName string) ([]string, error) {
 	found, err := Many[T](cfg, from, filterName)
 	if err != nil {
@@ -73,18 +67,15 @@ func ListMany[T any](cfg ItemConfig, from DbColType, filterName string) ([]strin
 	return FilterMap(found, nil, func(i int, e *T) string { return fieldStr(e, "Entity") }), nil
 }
 
-// from: existing, text, html
+// from: existing, text, html, [itemName] is Item 'Entity' value
 func Del[T any](cfg ItemConfig, from DbColType, itemName string) (int, error) {
 
 	sFilter := fmt.Sprintf(`{"Entity": "%v"}`, itemName)
 	lk.Log("sFilter %v", sFilter)
 
-	COL := cfg.DbColVal(from)
-	if len(COL) == 0 {
-		return 0, fmt.Errorf("from ItemDbCol can only be [existing, text, html]")
-	}
-
+	COL := cfg.DbColName(from)
 	mh.UseDbCol(DATABASE, string(COL))
+
 	if COL == cfg.DbColHtml {
 		sFilter = fmt.Sprintf(`{"Entity": {"$regex": "(?i)>?%v<?"}}`, itemName)
 	}
@@ -212,9 +203,9 @@ func Exists(from DbColType, name string) (bool, error) {
 		)
 		switch kind {
 		case "entity":
-			result, err = One[EntityType](cfg, from, name, false)
+			result, err = One[EntType](cfg, from, name, false)
 		case "collection":
-			result, err = One[CollectionType](cfg, from, name, false)
+			result, err = One[ColType](cfg, from, name, false)
 		}
 		if err != nil {
 			lk.WarnOnErr("%v", err)
@@ -229,14 +220,10 @@ func Exists(from DbColType, name string) (bool, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// [from] DbColType can only be [submit, approve, subscribe]
 func ActionExists(user string, from DbColType) (bool, error) {
 
-	COL := CfgAction.DbColVal(from)
-	if len(COL) == 0 {
-		return false, fmt.Errorf("[to] DbColType can only be [submit, approve, subscribe]")
-	}
-
-	mh.UseDbCol(DATABASE, string(COL))
+	mh.UseDbCol(DATABASE, string(CfgAction.DbColName(from)))
 
 	record, err := mh.FindOneAt[ActionRecord]("User", user)
 	if err != nil {

@@ -5,10 +5,10 @@ go 1.19
 require (
 	github.com/digisan/db-helper v0.0.17
 	github.com/digisan/go-config v0.0.8
-	github.com/digisan/go-generics v0.2.4
+	github.com/digisan/go-generics v0.2.5
 	github.com/digisan/go-mail v0.0.4
-	github.com/digisan/gotk v0.2.4
-	github.com/digisan/json-tool v0.1.6
+	github.com/digisan/gotk v0.2.5
+	github.com/digisan/json-tool v0.1.7
 	github.com/digisan/logkit v0.1.3
 	github.com/digisan/user-mgr v0.4.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -73,7 +73,7 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/youmark/pkcs8 v0.0.0-20201027041543-1326539a0a0a // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.2.0 // indirect
+	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
