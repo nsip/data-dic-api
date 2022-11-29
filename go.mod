@@ -16,8 +16,8 @@ require (
 	github.com/mailgun/mailgun-go/v4 v4.8.1
 	github.com/postfinance/single v0.0.2
 	github.com/swaggo/echo-swagger v1.3.5
-	github.com/swaggo/swag v1.8.7
-	github.com/tidwall/gjson v1.14.3
+	github.com/swaggo/swag v1.8.8
+	github.com/tidwall/gjson v1.14.4
 	github.com/tidwall/sjson v1.2.5
 	go.mongodb.org/mongo-driver v1.11.0
 )
@@ -43,7 +43,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/flatbuffers v22.10.26+incompatible // indirect
+	github.com/google/flatbuffers v22.11.23+incompatible // indirect
 	github.com/gookit/color v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect

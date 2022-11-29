@@ -90,10 +90,12 @@ func ListUser(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	if len(fields) == 0 {
+	// *** if 'fields' is not provided, swagger "Try" put it value as string "{fields}" ***
+	if fields == "{fields}" {
 		return c.JSON(http.StatusOK, users)
 	}
 
+	// convert url special symbol string to normal characters
 	if fields, err = url.QueryUnescape(fields); err != nil {
 		c.String(http.StatusBadRequest, "'fields' is invalid")
 	}
