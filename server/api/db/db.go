@@ -11,7 +11,6 @@ import (
 
 	mh "github.com/digisan/db-helper/mongo"
 	. "github.com/digisan/go-generics/v2"
-	tc "github.com/digisan/gotk/type-check"
 	lk "github.com/digisan/logkit"
 )
 
@@ -211,7 +210,7 @@ func Exists(from DbColType, name string) (bool, error) {
 			lk.WarnOnErr("%v", err)
 			return false, err
 		}
-		if !tc.IsNil(result) {
+		if !IsNil(result) {
 			return true, nil
 		}
 	}

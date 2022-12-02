@@ -13,7 +13,6 @@ import (
 	mh "github.com/digisan/db-helper/mongo"
 	. "github.com/digisan/go-generics/v2"
 	"github.com/digisan/gotk/strs"
-	tc "github.com/digisan/gotk/type-check"
 	lk "github.com/digisan/logkit"
 	u "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
@@ -93,7 +92,7 @@ func Upsert(c echo.Context) error {
 	switch {
 	case len(name) == 0:
 		return c.String(http.StatusBadRequest, "invalid payload, 'Entity' field is missing")
-	case !flagHtml && !tc.IsNumeric(id):
+	case !flagHtml && !IsNumeric(id):
 		return c.String(http.StatusBadRequest, "invalid payload, 'Metadata.Identifier' field is invalid")
 	}
 
@@ -284,7 +283,7 @@ func One(c echo.Context) error {
 			lk.WarnOnErr("%v", err)
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-		if !tc.IsNil(result) {
+		if !IsNil(result) {
 			return c.JSON(http.StatusOK, result)
 		}
 	}
