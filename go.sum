@@ -33,8 +33,8 @@ github.com/dgraph-io/ristretto v0.1.1/go.mod h1:S1GPSBCYCIhmVNfcth17y2zZtQT6wzkz
 github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
 github.com/digisan/db-helper v0.0.18 h1:J+dE45+PUwc8u8t/PGmYeiTA8ezmXwOvHXmqSEjm4rg=
 github.com/digisan/db-helper v0.0.18/go.mod h1:cU5mKqJV8a94mfXN+2gJ46voA6bfi4zQbRFbf7CU0e4=
-github.com/digisan/go-config v0.0.8 h1:lMwLl/bpQH4beCsxTXAwlY7pnTbmLRBLMsvZRjjFK/k=
-github.com/digisan/go-config v0.0.8/go.mod h1:o574zvg3V4lMyuYmqdhRaoIjIS7nAmzuxKhvsk8phJc=
+github.com/digisan/go-config v0.0.9 h1:3PYVkkE8LkBq/L2kSjx5yC/oSZWiLMKCBUc+MBHo0DU=
+github.com/digisan/go-config v0.0.9/go.mod h1:ihofbWjY/t6W15bjEwI9S2aCLwLyV0WBhb7TEKzFHxc=
 github.com/digisan/go-generics v0.2.6 h1:8bw1dcturp4gHYVGVpejrd/SyKPYDSxYS3wz9WezVHk=
 github.com/digisan/go-generics v0.2.6/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
 github.com/digisan/go-mail v0.0.6 h1:+fa6Lan0w1RKRpasadJKqk8di0lTj5rInc5ODoqf/tc=
