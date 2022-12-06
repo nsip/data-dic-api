@@ -115,6 +115,62 @@ paths:
       summary: list users' info
       tags:
       - Admin
+  /api/admin/user/onlines:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: user filter with uname wildcard(*)
+        in: query
+        name: uname
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "401":
+          description: Fail - unauthorized error
+        "403":
+          description: Fail - forbidden error
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: get all online users
+      tags:
+      - Admin
+  /api/admin/user/update/{fields}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: unique user name want to be updated
+        in: formData
+        name: uname
+        required: true
+        type: string
+      - description: which user fields (sep by ',') want to be updated.
+        in: path
+        name: fields
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - list successfully
+        "400":
+          description: Fail - bad request error
+        "401":
+          description: Fail - unauthorized error
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: update user's info by fields & its values
+      tags:
+      - Admin
   /api/dictionary/auth/approve:
     put:
       consumes:

@@ -9,7 +9,6 @@ import (
 
 	. "github.com/digisan/go-generics/v2"
 	gm "github.com/digisan/go-mail"
-	structtool "github.com/digisan/gotk/struct-tool"
 	lk "github.com/digisan/logkit"
 	u "github.com/digisan/user-mgr/user"
 	"github.com/golang-jwt/jwt"
@@ -26,7 +25,7 @@ import (
 // @Param   uname  query string false "user filter with uname wildcard(*)"
 // @Param   name   query string false "user filter with name wildcard(*)"
 // @Param   active query string false "user filter with active status"
-// @Param   fields  path  string false "which user's fields (sep by ',') want to list. if empty, return all fields"
+// @Param   fields path  string false "which user's fields (sep by ',') want to list. if empty, return all fields"
 // @Success 200 "OK - list successfully"
 // @Failure 401 "Fail - unauthorized error"
 // @Failure 403 "Fail - forbidden error"
@@ -40,23 +39,17 @@ func ListUser(c echo.Context) error {
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)
-		admin   = claims.UName
 	)
 
-	user, ok, err := u.LoadActiveUser(admin)
-
+	invoker, ok, err := u.LoadActiveUser(claims.UName)
 	switch {
 	case err != nil:
 		return c.String(http.StatusInternalServerError, err.Error())
 	case !ok:
-		return c.String(http.StatusForbidden, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
+		return c.String(http.StatusForbidden, fmt.Sprintf("invalid invoker status@[%s], dormant?", invoker.UName))
 	}
 
-	// if user.MemLevel != 3 {
-	// 	return c.String(http.StatusUnauthorized, "failed, you are not authorized to this api")
-	// }
-
-	// --- //
+	//////////////////////////////////////////////
 
 	var (
 		active = c.QueryParam("active")
@@ -90,15 +83,16 @@ func ListUser(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 
-	// *** if 'fields' is not provided, swagger "Try" put it value as string "{fields}" ***
-	if fields == "{fields}" {
-		return c.JSON(http.StatusOK, users)
-	}
-
 	// convert url special symbol string to normal characters
 	if fields, err = url.QueryUnescape(fields); err != nil {
 		c.String(http.StatusBadRequest, "'fields' is invalid")
 	}
+	// *** if 'fields' is not provided, swagger "Try" put it value as string "{fields}" or "undefined" ***
+	if In(fields, "{fields}", "undefined", "") {
+		return c.JSON(http.StatusOK, users)
+	}
+
+	// lk.Debug("%v", fields)
 
 	fieldsUser := []string{}
 	for _, field := range strings.Split(fields, ",") {
@@ -107,11 +101,135 @@ func ListUser(c echo.Context) error {
 		fieldsUser = AppendIf(In(field, "name", "Name"), fieldsUser, "Name")
 	}
 	rt := FilterMap(users, nil, func(i int, e *u.User) any {
-		v, err := structtool.PartialAsMap(e, fieldsUser...)
+		v, err := PartialAsMap(e, fieldsUser...)
 		lk.WarnOnErr("%v", err)
 		return v
 	})
 	return c.JSON(http.StatusOK, rt)
+}
+
+// @Title list online users
+// @Summary get all online users
+// @Description
+// @Tags    Admin
+// @Accept  json
+// @Produce json
+// @Param   uname query string false "user filter with uname wildcard(*)"
+// @Success 200 "OK - list successfully"
+// @Failure 401 "Fail - unauthorized error"
+// @Failure 403 "Fail - forbidden error"
+// @Failure 500 "Fail - internal error"
+// @Router /api/admin/user/onlines [get]
+// @Security ApiKeyAuth
+func ListOnlineUser(c echo.Context) error {
+
+	lk.Log("Enter: ListOnlineUser")
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)
+		claims  = userTkn.Claims.(*u.UserClaims)
+	)
+
+	invoker, ok, err := u.LoadActiveUser(claims.UName)
+	switch {
+	case err != nil:
+		return c.String(http.StatusInternalServerError, err.Error())
+	case !ok:
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("invalid invoker status@[%s], dormant?", invoker.UName))
+	}
+
+	//////////////////////////////////////////////
+
+	var (
+		wUname = c.QueryParam("uname")
+		rUname = wc2re(wUname)
+	)
+
+	onlines, err := u.OnlineUsers()
+	// for _, user := range onlines {
+	// 	fmt.Println(user)
+	// }
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	FilterFast(&onlines, func(i int, e *u.UserOnline) bool {
+		if len(wUname) > 0 && !rUname.MatchString(e.Uname) {
+			return false
+		}
+		return true
+	})
+
+	return c.JSON(http.StatusOK, onlines)
+}
+
+// @Title   update user's info
+// @Summary update user's info by fields & its values
+// @Description
+// @Tags    Admin
+// @Accept  json
+// @Produce json
+// @Param   uname  formData string true "unique user name want to be updated"
+// @Param   fields path     string true "which user struct fields (sep by ',') want to be updated. (fields must be identical to struct fields)"
+// @Success 200 "OK - list successfully"
+// @Failure 400 "Fail - bad request error"
+// @Failure 401 "Fail - unauthorized error"
+// @Failure 500 "Fail - internal error"
+// @Router /api/admin/user/update/{fields} [put]
+// @Security ApiKeyAuth
+func UpdateUser(c echo.Context) error {
+
+	lk.Log("Enter: UpdateUser")
+
+	var (
+		userTkn = c.Get("user").(*jwt.Token)
+		claims  = userTkn.Claims.(*u.UserClaims)
+	)
+
+	invoker, ok, err := u.LoadActiveUser(claims.UName)
+	switch {
+	case err != nil:
+		return c.String(http.StatusInternalServerError, err.Error())
+	case !ok:
+		return c.String(http.StatusForbidden, fmt.Sprintf("invalid invoker status@[%s], dormant?", invoker.UName))
+	}
+
+	//////////////////////////////////////////////
+
+	var (
+		uname  = c.FormValue("uname") // ***
+		fields = c.Param("fields")    // sep by ','
+	)
+
+	user, ok, err := u.LoadUser(uname, true)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	if !ok {
+		return c.String(http.StatusBadRequest, fmt.Sprintf("'%s' is not existing, unable to update", uname))
+	}
+
+	if fields, err = url.QueryUnescape(fields); err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+	}
+	if In(fields, "{fields}", "undefined", "") {
+		return c.String(http.StatusBadRequest, "updating 'fields' must be provided")
+	}
+
+	for _, field := range strings.Split(fields, ",") {
+
+		// set struct
+		if err = SetFieldValue(user, field, c.FormValue(field)); err != nil { // *** c.FormValue here ***
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+
+		// update db
+		if err = u.UpdateUser(user); err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+	}
+
+	return c.JSON(http.StatusOK, fmt.Sprintf("'%v' has been updated", user))
 }
 
 // @Title list user's action record
@@ -133,11 +251,9 @@ func ListUserAction(c echo.Context) error {
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)
-		admin   = claims.UName
 	)
 
-	user, ok, err := u.LoadActiveUser(admin)
-
+	user, ok, err := u.LoadActiveUser(claims.UName)
 	switch {
 	case err != nil:
 		return c.String(http.StatusInternalServerError, err.Error())
@@ -183,11 +299,9 @@ func SendEmail(c echo.Context) error {
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)
-		admin   = claims.UName
 	)
 
-	user, ok, err := u.LoadActiveUser(admin)
-
+	user, ok, err := u.LoadActiveUser(claims.UName)
 	switch {
 	case err != nil:
 		return c.String(http.StatusInternalServerError, err.Error())

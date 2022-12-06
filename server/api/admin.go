@@ -12,6 +12,7 @@ func AdminHandler(r *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{
 		"/user/list/:fields":        ad.ListUser,
+		"/user/onlines":             ad.ListOnlineUser,
 		"/user/action-list/:action": ad.ListUserAction,
 	}
 
@@ -19,7 +20,10 @@ func AdminHandler(r *echo.Group) {
 		"/email": ad.SendEmail,
 	}
 
-	var mPUT = map[string]echo.HandlerFunc{}
+	var mPUT = map[string]echo.HandlerFunc{
+		"/user/update/:fields": ad.UpdateUser,
+	}
+
 	var mDELETE = map[string]echo.HandlerFunc{}
 	var mPATCH = map[string]echo.HandlerFunc{}
 
