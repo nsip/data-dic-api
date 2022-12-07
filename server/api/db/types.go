@@ -66,21 +66,20 @@ type ColType struct {
 }
 
 func ItemKind(data []byte) string {
-
-	return gjson.Get(string(data), "Metadata.Type").String()
-
-	// var (
-	// 	ent = &EntityType{}
-	// 	col = &CollectionType{}
-	// )
-	// switch {
-	// case json.Unmarshal(data, ent) == nil:
-	// 	return "entity"
-	// case json.Unmarshal(data, col) == nil:
-	// 	return "collection"
-	// default:
-	// 	return ""
-	// }
+	var (
+		ent = EntType{}
+		col = ColType{}
+	)
+	switch {
+	case json.Unmarshal(data, &ent) == nil:
+		return "entity"
+	case json.Unmarshal(data, &col) == nil:
+		return "collection"
+	default:
+		mt := gjson.Get(string(data), "Metadata.Type").String()
+		lk.Warn("%v", mt)
+		return mt
+	}
 }
 
 func Item[T any](data []byte) *T {

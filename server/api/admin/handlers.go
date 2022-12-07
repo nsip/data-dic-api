@@ -265,10 +265,6 @@ func ListUserAction(c echo.Context) error {
 		return c.String(http.StatusForbidden, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
 	}
 
-	// if user.MemLevel != 3 {
-	// 	return c.String(http.StatusUnauthorized, "failed, you are not authorized to this api")
-	// }
-
 	// --- //
 
 	var (
@@ -300,6 +296,8 @@ func ListUserAction(c echo.Context) error {
 // @Security ApiKeyAuth
 func SendEmail(c echo.Context) error {
 
+	lk.Warn("Enter: SendEmail")
+
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)
@@ -312,10 +310,6 @@ func SendEmail(c echo.Context) error {
 	case !ok:
 		return c.String(http.StatusForbidden, fmt.Sprintf("invalid user status@[%s], dormant?", user.UName))
 	}
-
-	// if user.MemLevel != 3 {
-	// 	return c.String(http.StatusUnauthorized, "failed, you are not authorized to this api")
-	// }
 
 	const (
 		sep = "," // separator for unames
