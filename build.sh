@@ -43,6 +43,9 @@ cp -rf ../data $OUTPATH_LINUX
 cp -rf ../mailgun-config.json $OUTPATH_LINUX
 cp -rf ../sendgrid-config.json $OUTPATH_LINUX
 
+# copy init-admin config file to current folder
+cp -rf ../init-admin.json $OUTPATH_LINUX
+
 #######################################################################################
 
 if [[ $1 == 'release' || $1 == 'rel' ]]

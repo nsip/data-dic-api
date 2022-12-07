@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	cfg "github.com/digisan/go-config"
 	lk "github.com/digisan/logkit"
 	si "github.com/digisan/user-mgr/sign-in"
 	so "github.com/digisan/user-mgr/sign-out"
@@ -16,6 +17,9 @@ import (
 var (
 	ctx    context.Context
 	Cancel context.CancelFunc
+
+	// init-admin users
+	admins []string
 )
 
 func init() {
@@ -26,7 +30,7 @@ func init() {
 	u.InitDB("./data/db-user")
 
 	// set user validator
-	su.SetValidator(map[string]func(o, v any) u.ValRst{		
+	su.SetValidator(map[string]func(o, v any) u.ValRst{
 		vf.AvatarType: func(o, v any) u.ValRst {
 			ok := v == "" || strings.HasPrefix(v.(string), "image/")
 			return u.NewValRst(ok, "avatarType must have prefix - 'image/'")
@@ -36,6 +40,12 @@ func init() {
 	// monitor active users
 	ctx, Cancel = context.WithCancel(context.Background())
 	monitorUser(ctx, 7200*time.Second) // heartbeats checker timeout
+
+	// load initial admin users
+	cfg.Init("init-admin", false, "./init-admin.json")
+	cfg.Use("init-admin")
+	cfg.Show()
+	admins = cfg.ValArr[string]("admin")
 }
 
 func monitorUser(ctx context.Context, offlineTimeout time.Duration) {

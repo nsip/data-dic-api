@@ -11,6 +11,7 @@ cd -
 if [[ $1 == 'all' ]]
 then
 
+go mod tidy
 rm -f go.sum
 go get -u ./...
 

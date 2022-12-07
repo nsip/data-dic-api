@@ -150,7 +150,8 @@ paths:
         name: uname
         required: true
         type: string
-      - description: which user fields (sep by ',') want to be updated.
+      - description: which user struct fields (sep by ',') want to be updated. (fields
+          must be identical to struct fields)
         in: path
         name: fields
         required: true

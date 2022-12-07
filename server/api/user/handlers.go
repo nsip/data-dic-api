@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	. "github.com/digisan/go-generics/v2"
 	lk "github.com/digisan/logkit"
 	si "github.com/digisan/user-mgr/sign-in"
 	so "github.com/digisan/user-mgr/sign-out"
@@ -128,6 +129,11 @@ func VerifyEmail(c echo.Context) error {
 	// double check before storing
 	if err := su.ChkInput(user); err != nil {
 		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	// if user is admin, then
+	if In(user.UName, admins...) {
+		user.SysRole = "admin"
 	}
 
 	// store into db

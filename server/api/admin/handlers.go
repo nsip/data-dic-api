@@ -201,7 +201,7 @@ func UpdateUser(c echo.Context) error {
 		fields = c.Param("fields")    // sep by ','
 	)
 
-	user, ok, err := u.LoadUser(uname, true)
+	user, ok, err := u.LoadAnyUser(uname)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -219,7 +219,9 @@ func UpdateUser(c echo.Context) error {
 	for _, field := range strings.Split(fields, ",") {
 
 		// set struct
-		if err = SetFieldValue(user, field, c.FormValue(field)); err != nil { // *** c.FormValue here ***
+		val := c.FormValue(field) // *** c.FormValue here ***
+		// lk.Debug("%v", val)
+		if err = SetFieldValue(user, field, val); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
@@ -227,6 +229,8 @@ func UpdateUser(c echo.Context) error {
 		if err = u.UpdateUser(user); err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
+
+		// lk.Debug("%+v", user)
 	}
 
 	return c.JSON(http.StatusOK, fmt.Sprintf("'%v' has been updated", user))

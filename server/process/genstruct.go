@@ -17,9 +17,12 @@ import (
 func GenEntityPathVal(fpaths ...string) (map[string]string, error) {
 	m := make(map[string]string)
 	for _, fpath := range fpaths {
+
+		// exclude some
 		if strs.HasAnySuffix(fpath, "class-link.json", "collection-entities.json") {
 			continue
 		}
+
 		data, err := os.ReadFile(fpath)
 		if err != nil {
 			lk.WarnOnErr("%v", err)
@@ -38,11 +41,15 @@ func GenEntityPathVal(fpaths ...string) (map[string]string, error) {
 			return nil, fmt.Errorf("%v @ "+fpath, "entity missing")
 		}
 
+		// lk.Debug("%v", fpath)
+
 		// make json
 		js := "{"
 		for path, val := range mPathVal {
 			path = strings.ReplaceAll(path, `.`, `[dot]`)
-			val = strings.ReplaceAll(val.(string), `"`, `\"`)
+			if sval, ok := val.(string); ok {
+				val = strings.ReplaceAll(sval, `"`, `\"`)
+			}
 			js += fmt.Sprintf(`"%s": "%s",`, path, val)
 		}
 		js = strings.TrimSuffix(js, ",") + "}"

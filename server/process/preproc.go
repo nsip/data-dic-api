@@ -148,9 +148,14 @@ func Preproc(datadir, odir, edir string) error {
 		return err
 	}
 
-	for _, f := range files {
+	for i, f := range files {
 		if fpath := filepath.Join(datadir, f.Name()); strings.HasSuffix(fpath, ".json") {
-			lk.Log("processing...  %v", fpath)
+			lk.Log("processing... %d --- %v", i, fpath)
+
+			// if i < len(files)-1 {
+			// 	next := filepath.Join(datadir, files[i+1].Name())
+			// 	lk.Debug("next is: %d --- %v", i+1, next)
+			// }
 
 			data, err := os.ReadFile(fpath)
 			if err != nil {

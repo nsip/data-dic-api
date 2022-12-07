@@ -253,7 +253,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "which user fields (sep by ',') want to be updated.",
+                        "description": "which user struct fields (sep by ',') want to be updated. (fields must be identical to struct fields)",
                         "name": "fields",
                         "in": "path",
                         "required": true

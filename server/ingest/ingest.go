@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	dbName = "dictionaryTest"
+	dbName = "MyDictionary"
 )
 
 func IngestViaCmd(clrdb bool) error {
