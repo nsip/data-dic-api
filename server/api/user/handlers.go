@@ -215,8 +215,10 @@ func LogIn(c echo.Context) error {
 // @Produce json
 // @Success 200 "OK - sign-out successfully"
 // @Failure 500 "Fail - internal error"
-// @Router /api/user/pub/sign-out [put]
-func SignOut(c echo.Context) error {
+// @Router /api/user/auth/sign-out [put]
+// @Security ApiKeyAuth
+func LogOut(c echo.Context) error {
+
 	var (
 		userTkn = c.Get("user").(*jwt.Token)
 		claims  = userTkn.Claims.(*u.UserClaims)

@@ -595,6 +595,22 @@ paths:
       summary: get this api service version
       tags:
       - System
+  /api/user/auth/sign-out:
+    put:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK - sign-out successfully
+        "500":
+          description: Fail - internal error
+      security:
+      - ApiKeyAuth: []
+      summary: sign out action.
+      tags:
+      - User
   /api/user/auth/uname:
     get:
       consumes:
@@ -635,20 +651,6 @@ paths:
         "500":
           description: Fail - internal error
       summary: sign in action. if ok, got token
-      tags:
-      - User
-  /api/user/pub/sign-out:
-    put:
-      consumes:
-      - application/json
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK - sign-out successfully
-        "500":
-          description: Fail - internal error
-      summary: sign out action.
       tags:
       - User
   /api/user/pub/sign-up:

@@ -9,7 +9,8 @@
             "OnlyFirst": true,
             "Files": [
                 "./server/main.go"
-            ]
+            ],
+            "NewPort": -1
         }
     ],
     "SymbolRepl": [

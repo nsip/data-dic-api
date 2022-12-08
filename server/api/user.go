@@ -11,17 +11,12 @@ import (
 func SignHandler(e *echo.Group) {
 
 	var mGET = map[string]echo.HandlerFunc{}
-
 	var mPOST = map[string]echo.HandlerFunc{
 		"/sign-up":      user.NewUser,
 		"/verify-email": user.VerifyEmail,
 		"/sign-in":      user.LogIn,
 	}
-
-	var mPUT = map[string]echo.HandlerFunc{
-		"/sign-out": user.SignOut,
-	}
-
+	var mPUT = map[string]echo.HandlerFunc{}
 	var mDELETE = map[string]echo.HandlerFunc{}
 	var mPATCH = map[string]echo.HandlerFunc{}
 
@@ -65,7 +60,9 @@ func UserAuthHandler(e *echo.Group) {
 		"/uname": user.GetUname,
 	}
 	var mPOST = map[string]echo.HandlerFunc{}
-	var mPUT = map[string]echo.HandlerFunc{}
+	var mPUT = map[string]echo.HandlerFunc{
+		"/sign-out": user.LogOut,
+	}
 	var mDELETE = map[string]echo.HandlerFunc{}
 	var mPATCH = map[string]echo.HandlerFunc{}
 

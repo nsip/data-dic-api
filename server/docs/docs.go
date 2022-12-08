@@ -933,6 +933,33 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/user/auth/sign-out": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "sign out action.",
+                "responses": {
+                    "200": {
+                        "description": "OK - sign-out successfully"
+                    },
+                    "500": {
+                        "description": "Fail - internal error"
+                    }
+                }
+            }
+        },
         "/api/user/auth/uname": {
             "get": {
                 "security": [
@@ -992,28 +1019,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Fail - incorrect password"
-                    },
-                    "500": {
-                        "description": "Fail - internal error"
-                    }
-                }
-            }
-        },
-        "/api/user/pub/sign-out": {
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "sign out action.",
-                "responses": {
-                    "200": {
-                        "description": "OK - sign-out successfully"
                     },
                     "500": {
                         "description": "Fail - internal error"
