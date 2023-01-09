@@ -41,7 +41,7 @@ func FixFileName(datadir, odir string) error {
 			entity := gjson.Get(string(data), "Entity").String()
 			fname := entity + ".json"
 			if len(odir) == 0 {
-				odir = strs.SplitPartFromLast(fpath, "/", 2)
+				odir = strs.SplitPartFromLastTo[string](fpath, "/", 2)
 			}
 			fpathNew := filepath.Join(odir, fname)
 			lk.Log("destination...  %s", fpathNew)

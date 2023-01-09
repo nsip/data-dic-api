@@ -11,8 +11,9 @@ cd -
 if [[ $1 == 'all' ]]
 then
 
+rm -f go.sum go.mod
+go mod init github.com/nsip/data-dic-api
+go get ./...
 go mod tidy
-rm -f go.sum
-go get -u ./...
 
 fi
