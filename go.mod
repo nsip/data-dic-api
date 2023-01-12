@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/digisan/db-helper v0.0.19
 	github.com/digisan/go-config v0.1.5
-	github.com/digisan/go-generics v0.2.24
+	github.com/digisan/go-generics v0.2.25
 	github.com/digisan/go-mail v0.0.6
 	github.com/digisan/gotk v0.2.14
 	github.com/digisan/json-tool v0.1.9

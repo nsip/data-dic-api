@@ -43,8 +43,8 @@ github.com/digisan/fileflatter v0.0.3 h1:uP1iTU1Bu06/NLQPhiqMe9ju+vypMqfltK2qyzB
 github.com/digisan/fileflatter v0.0.3/go.mod h1:7xv/2C0aEsUI5K1+61WhmNOoKbyACIX0jF3i1aHFYtw=
 github.com/digisan/go-config v0.1.5 h1:b3KmSXhF+8evk1avYjUniJAfqngm4gW2qxv9MnoV6AQ=
 github.com/digisan/go-config v0.1.5/go.mod h1:S9bvRIl0woeuGS+Xk7CNUA6as+xOTUPyZhgH5JwsmMs=
-github.com/digisan/go-generics v0.2.24 h1:vzNGuKke6/0llm0CL8up+6BpDF75lT0YcNXi6fpidQw=
-github.com/digisan/go-generics v0.2.24/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
+github.com/digisan/go-generics v0.2.25 h1:NOwRmjCCQvYPJ5UM3u+DUy5Yy8mqJoI13XRS4yFKooc=
+github.com/digisan/go-generics v0.2.25/go.mod h1:HoHbkpjEgiw3YQ3QaADIfeFt/kpdODb0qerSbs0PSBA=
 github.com/digisan/go-mail v0.0.6 h1:+fa6Lan0w1RKRpasadJKqk8di0lTj5rInc5ODoqf/tc=
 github.com/digisan/go-mail v0.0.6/go.mod h1:bX7B1xF8V0ab1QxPECP+AM3lFp5uCLLva/k0B3c2Ipo=
 github.com/digisan/gotk v0.2.14 h1:kdRTNh+9diwq6dbIAP/JocBgJ1OZqkXc4SudgaOrye0=

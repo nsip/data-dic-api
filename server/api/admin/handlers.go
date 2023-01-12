@@ -221,7 +221,7 @@ func UpdateUser(c echo.Context) error {
 		// set struct
 		val := c.FormValue(field) // *** c.FormValue here ***
 		// lk.Debug("%v", val)
-		if err = SetFieldValue(user, field, val); err != nil {
+		if err = SetField(user, field, val); err != nil {
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
